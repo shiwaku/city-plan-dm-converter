@@ -71,12 +71,18 @@ map.on("load", () => {
     tileSize: 256,
   });
 
-  // 都市計画基本図ソース
+  // 都市計画基本図ソース（1/10000: z2-z14）
   map.addSource("kihonzu", {
     type: "vector",
-    url: "pmtiles://https://pmtiles-data.s3.ap-northeast-1.amazonaws.com/city-shizuoka/kihonzu.pmtiles",
+    url: "pmtiles://https://pmtiles-data.s3.ap-northeast-1.amazonaws.com/city-shizuoka/kihonzu_10000.pmtiles",
     attribution:
       '<a href="https://data.bodik.jp/dataset/221007_1712212695" target="_blank">測量法第44条に基づき、静岡市長の承認を得て1/2,500および1/10,000都市計画基本図を加工して作成（承認番号：07静都都第2068号）</a>',
+  });
+
+  // 都市計画基本図ソース（1/2500: z14-z16）
+  map.addSource("kihonzu_2500", {
+    type: "vector",
+    url: "pmtiles://https://pmtiles-data.s3.ap-northeast-1.amazonaws.com/city-shizuoka/kihonzu_2500.pmtiles",
   });
 
   // CS立体図レイヤー
@@ -264,7 +270,7 @@ map.on("load", () => {
   map.addLayer({
     id: "kihonzu_2500_polygon_fill",
     type: "fill",
-    source: "kihonzu",
+    source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_polygon",
     minzoom: 14,
     layout: { visibility: "visible" },
@@ -277,7 +283,7 @@ map.on("load", () => {
   map.addLayer({
     id: "kihonzu_2500_polygon_outline",
     type: "line",
-    source: "kihonzu",
+    source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_polygon",
     minzoom: 14,
     layout: { visibility: "visible" },
@@ -290,7 +296,7 @@ map.on("load", () => {
   map.addLayer({
     id: "kihonzu_2500_line_sidewalk",
     type: "line",
-    source: "kihonzu",
+    source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_line",
     minzoom: 14,
     filter: ["==", ["to-number", ["get", "Layer"]], 2213],
@@ -305,7 +311,7 @@ map.on("load", () => {
   map.addLayer({
     id: "kihonzu_2500_line_contour",
     type: "line",
-    source: "kihonzu",
+    source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_line",
     minzoom: 14,
     filter: [
@@ -323,7 +329,7 @@ map.on("load", () => {
   map.addLayer({
     id: "kihonzu_2500_line_building",
     type: "line",
-    source: "kihonzu",
+    source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_line",
     minzoom: 14,
     filter: [
@@ -341,7 +347,7 @@ map.on("load", () => {
   map.addLayer({
     id: "kihonzu_2500_line_other",
     type: "line",
-    source: "kihonzu",
+    source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_line",
     minzoom: 14,
     filter: [
@@ -360,7 +366,7 @@ map.on("load", () => {
   map.addLayer({
     id: "kihonzu_2500_symbol",
     type: "symbol",
-    source: "kihonzu",
+    source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_symbol",
     minzoom: 14,
     layout: {
@@ -395,7 +401,7 @@ map.on("load", () => {
   map.addLayer({
     id: "kihonzu_2500_annotation",
     type: "symbol",
-    source: "kihonzu",
+    source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_annotation",
     minzoom: 14,
     layout: {
