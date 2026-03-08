@@ -84,6 +84,8 @@ map.on("load", () => {
   map.addSource("kihonzu_2500", {
     type: "vector",
     url: "pmtiles://https://pmtiles-data.s3.ap-northeast-1.amazonaws.com/city-shizuoka/kihonzu_2500.pmtiles",
+    attribution:
+      '<a href="https://data.bodik.jp/dataset/221007_1712212695" target="_blank">測量法第44条に基づき、静岡市長の承認を得て1/2,500および1/10,000都市計画基本図を加工して作成（承認番号：07静都都第2068号）</a>',
   });
 
   // CS立体図レイヤー
