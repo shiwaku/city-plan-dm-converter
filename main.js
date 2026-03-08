@@ -46,6 +46,7 @@ const kihonzuLayerIds = [
   "kihonzu_10000_line_other",
   "kihonzu_10000_symbol",
   "kihonzu_10000_annotation",
+  "kihonzu_10000_annotation_kijunten",
   "kihonzu_2500_polygon_fill",
   "kihonzu_2500_polygon_outline",
   "kihonzu_2500_line_sidewalk",
@@ -101,7 +102,7 @@ map.on("load", () => {
     source: "kihonzu",
     "source-layer": "kihonzu_10000_polygon",
     minzoom: 2,
-    maxzoom: 14,
+    maxzoom: 15,
     layout: { visibility: "visible" },
     paint: {
       "fill-color": "#ffffff",
@@ -115,7 +116,7 @@ map.on("load", () => {
     source: "kihonzu",
     "source-layer": "kihonzu_10000_polygon",
     minzoom: 2,
-    maxzoom: 14,
+    maxzoom: 15,
     layout: { visibility: "visible" },
     paint: {
       "line-color": "#000000",
@@ -129,7 +130,7 @@ map.on("load", () => {
     source: "kihonzu",
     "source-layer": "kihonzu_10000_line",
     minzoom: 2,
-    maxzoom: 14,
+    maxzoom: 15,
     filter: ["==", ["to-number", ["get", "Layer"]], 2213],
     layout: { visibility: "visible" },
     paint: {
@@ -145,7 +146,7 @@ map.on("load", () => {
     source: "kihonzu",
     "source-layer": "kihonzu_10000_line",
     minzoom: 12,
-    maxzoom: 14,
+    maxzoom: 15,
     filter: [
       "in",
       ["to-number", ["get", "Layer"]],
@@ -164,7 +165,7 @@ map.on("load", () => {
     source: "kihonzu",
     "source-layer": "kihonzu_10000_line",
     minzoom: 13,
-    maxzoom: 14,
+    maxzoom: 15,
     filter: [
       "in",
       ["to-number", ["get", "Layer"]],
@@ -183,7 +184,7 @@ map.on("load", () => {
     source: "kihonzu",
     "source-layer": "kihonzu_10000_line",
     minzoom: 2,
-    maxzoom: 14,
+    maxzoom: 15,
     filter: [
       "all",
       ["!=", ["to-number", ["get", "Layer"]], 2213],
@@ -203,7 +204,7 @@ map.on("load", () => {
     source: "kihonzu",
     "source-layer": "kihonzu_10000_symbol",
     minzoom: 13,
-    maxzoom: 14,
+    maxzoom: 15,
     layout: {
       "icon-image": [
         "concat",
@@ -239,7 +240,48 @@ map.on("load", () => {
     source: "kihonzu",
     "source-layer": "kihonzu_10000_annotation",
     minzoom: 13,
-    maxzoom: 14,
+    maxzoom: 15,
+    filter: [
+      "!",
+      ["in", ["to-number", ["get", "Layer"]], ["literal", [3001, 3003, 6101, 7301, 7302, 7303, 7304, 7305, 7306, 7307, 7308, 7309, 7311, 7312]]],
+    ],
+    layout: {
+      "text-field": ["coalesce", ["get", "Text"], ""],
+      "text-size": 10,
+      "text-anchor": "center",
+      "text-offset": [1.5, -1],
+      "text-rotation-alignment": "map",
+      "text-rotate": [
+        "let",
+        "a",
+        ["coalesce", ["to-number", ["get", "KAKUDO"]], 0],
+        [
+          "case",
+          ["any", ["==", ["var", "a"], 90], ["==", ["var", "a"], -90]],
+          0,
+          ["*", -1, ["var", "a"]],
+        ],
+      ],
+      "visibility": "visible",
+    },
+    paint: {
+      "text-color": "#000",
+      "text-halo-color": "#fff",
+      "text-halo-width": 1.5,
+    },
+  });
+
+  // 都市計画基本図レイヤー（1/10000 基準点注記）
+  map.addLayer({
+    id: "kihonzu_10000_annotation_kijunten",
+    type: "symbol",
+    source: "kihonzu",
+    "source-layer": "kihonzu_10000_annotation",
+    minzoom: 12,
+    maxzoom: 15,
+    filter: [
+      "in", ["to-number", ["get", "Layer"]], ["literal", [3001, 3003, 6101, 7301, 7302, 7303, 7304, 7305, 7306, 7307, 7308, 7309, 7311, 7312]],
+    ],
     layout: {
       "text-field": ["coalesce", ["get", "Text"], ""],
       "text-size": 10,
@@ -272,7 +314,7 @@ map.on("load", () => {
     type: "fill",
     source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_polygon",
-    minzoom: 14,
+    minzoom: 15,
     layout: { visibility: "visible" },
     paint: {
       "fill-color": "#ffffff",
@@ -285,7 +327,7 @@ map.on("load", () => {
     type: "line",
     source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_polygon",
-    minzoom: 14,
+    minzoom: 15,
     layout: { visibility: "visible" },
     paint: {
       "line-color": "#000000",
@@ -298,7 +340,7 @@ map.on("load", () => {
     type: "line",
     source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_line",
-    minzoom: 14,
+    minzoom: 15,
     filter: ["==", ["to-number", ["get", "Layer"]], 2213],
     layout: { visibility: "visible" },
     paint: {
@@ -313,7 +355,7 @@ map.on("load", () => {
     type: "line",
     source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_line",
-    minzoom: 14,
+    minzoom: 15,
     filter: [
       "in",
       ["to-number", ["get", "Layer"]],
@@ -331,7 +373,7 @@ map.on("load", () => {
     type: "line",
     source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_line",
-    minzoom: 14,
+    minzoom: 15,
     filter: [
       "in",
       ["to-number", ["get", "Layer"]],
@@ -349,7 +391,7 @@ map.on("load", () => {
     type: "line",
     source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_line",
-    minzoom: 14,
+    minzoom: 15,
     filter: [
       "all",
       ["!=", ["to-number", ["get", "Layer"]], 2213],
@@ -368,7 +410,7 @@ map.on("load", () => {
     type: "symbol",
     source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_symbol",
-    minzoom: 14,
+    minzoom: 15,
     layout: {
       "icon-image": [
         "concat",
@@ -403,7 +445,7 @@ map.on("load", () => {
     type: "symbol",
     source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_annotation",
-    minzoom: 14,
+    minzoom: 15,
     layout: {
       "text-field": ["coalesce", ["get", "Text"], ""],
       "text-size": [
