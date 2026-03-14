@@ -10,7 +10,7 @@ const map = new maplibregl.Map({
   container: "map",
   style: "std.json",
   zoom: 15.8,
-  minZoom: 13,
+  minZoom: 9,
   maxZoom: 20,
   center: [138.388768, 34.971902],
   hash: true,
