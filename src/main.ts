@@ -1,3 +1,8 @@
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+import * as pmtiles from "pmtiles";
+import "./style.css";
+
 const protocol = new pmtiles.Protocol();
 maplibregl.addProtocol("pmtiles", protocol.tile);
 
@@ -35,9 +40,9 @@ map.addControl(
   }),
 );
 
-const csLayerIds = ["shizuoka-cs"];
+const csLayerIds: string[] = ["shizuoka-cs"];
 
-const kihonzuLayerIds = [
+const kihonzuLayerIds: string[] = [
   "kihonzu_10000_polygon_fill",
   "kihonzu_10000_polygon_outline",
   "kihonzu_10000_line_sidewalk",
@@ -480,13 +485,13 @@ map.on("load", () => {
   });
 
   // レイヤー切替イベント
-  document.getElementById("toggle-cs").addEventListener("change", (e) => {
-    const visibility = e.target.checked ? "visible" : "none";
+  document.getElementById("toggle-cs")!.addEventListener("change", (e) => {
+    const visibility = (e.target as HTMLInputElement).checked ? "visible" : "none";
     csLayerIds.forEach((id) => map.setLayoutProperty(id, "visibility", visibility));
   });
 
-  document.getElementById("toggle-kihonzu").addEventListener("change", (e) => {
-    const visibility = e.target.checked ? "visible" : "none";
+  document.getElementById("toggle-kihonzu")!.addEventListener("change", (e) => {
+    const visibility = (e.target as HTMLInputElement).checked ? "visible" : "none";
     kihonzuLayerIds.forEach((id) => map.setLayoutProperty(id, "visibility", visibility));
   });
 });

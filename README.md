@@ -16,17 +16,41 @@
 
 ---
 
+## 開発環境
+
+Node.js が必要です。
+
+```bash
+npm install   # 依存パッケージのインストール
+npm run dev   # 開発サーバー起動 → http://localhost:5173/
+npm run build # 本番ビルド
+```
+
+### 使用技術
+
+| パッケージ | 用途 |
+|-----------|------|
+| [Vite](https://vitejs.dev/) | ビルドツール・開発サーバー |
+| [MapLibre GL JS](https://maplibre.org/) | ベクトルタイル地図表示 |
+| [PMTiles](https://github.com/protomaps/PMTiles) | PMTilesプロトコル対応 |
+| TypeScript | 型安全な開発 |
+
+---
+
 ## ファイル構成
 
 ```
 .
 ├── index.html              # マップHTML
-├── main.js                 # マップ初期化・レイヤー定義
-├── style.css               # スタイル
+├── package.json            # npm設定
+├── tsconfig.json           # TypeScript設定
 ├── std.json                # 最適化ベクトルタイル スタイル定義
-├── kihonzu_10000.pmtiles   # ベクトルタイル 1/10,000（z2-z14）
-└── kihonzu_2500.pmtiles    # ベクトルタイル 1/2,500（z15-z16）
+└── src/
+    ├── main.ts             # マップ初期化・レイヤー定義
+    └── style.css           # スタイル
 ```
+
+PMTilesファイルはAmazon S3（`pmtiles-data.s3.ap-northeast-1.amazonaws.com`）にホスティングしています。
 
 ---
 
