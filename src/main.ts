@@ -138,7 +138,7 @@ map.on("load", () => {
     "source-layer": "kihonzu_10000_line",
     minzoom: 2,
     maxzoom: 15,
-    filter: ["==", ["to-number", ["get", "Layer"]], 2213],
+    filter: ["==", ["to-number", ["get", "Code"]], 2213],
     layout: { visibility: "visible" },
     paint: {
       "line-color": "#000000",
@@ -156,7 +156,7 @@ map.on("load", () => {
     maxzoom: 15,
     filter: [
       "in",
-      ["to-number", ["get", "Layer"]],
+      ["to-number", ["get", "Code"]],
       ["literal", [7101, 7102, 7103, 7104]],
     ],
     layout: { visibility: "visible" },
@@ -175,7 +175,7 @@ map.on("load", () => {
     maxzoom: 15,
     filter: [
       "in",
-      ["to-number", ["get", "Layer"]],
+      ["to-number", ["get", "Code"]],
       ["literal", [3001, 3002, 3003, 3004]],
     ],
     layout: { visibility: "visible" },
@@ -194,9 +194,9 @@ map.on("load", () => {
     maxzoom: 15,
     filter: [
       "all",
-      ["!=", ["to-number", ["get", "Layer"]], 2213],
-      ["!", ["in", ["to-number", ["get", "Layer"]], ["literal", [7101, 7102, 7103, 7104]]]],
-      ["!", ["in", ["to-number", ["get", "Layer"]], ["literal", [3001, 3002, 3003, 3004]]]],
+      ["!=", ["to-number", ["get", "Code"]], 2213],
+      ["!", ["in", ["to-number", ["get", "Code"]], ["literal", [7101, 7102, 7103, 7104]]]],
+      ["!", ["in", ["to-number", ["get", "Code"]], ["literal", [3001, 3002, 3003, 3004]]]],
     ],
     layout: { visibility: "visible" },
     paint: {
@@ -216,7 +216,7 @@ map.on("load", () => {
       "icon-image": [
         "concat",
         "dm:dm-",
-        ["to-string", ["get", "Layer"]],
+        ["to-string", ["get", "Code"]],
       ],
       "icon-size": [
         "interpolate",
@@ -226,13 +226,13 @@ map.on("load", () => {
         [
           "*",
           0.5,
-          ["case", ["==", ["to-string", ["get", "Layer"]], "2238"], 0.4, 1.0],
+          ["case", ["==", ["to-string", ["get", "Code"]], "2238"], 0.4, 1.0],
         ],
         14,
         [
           "*",
           0.75,
-          ["case", ["==", ["to-string", ["get", "Layer"]], "2238"], 0.4, 1.0],
+          ["case", ["==", ["to-string", ["get", "Code"]], "2238"], 0.4, 1.0],
         ],
       ],
       "icon-allow-overlap": true,
@@ -250,7 +250,7 @@ map.on("load", () => {
     maxzoom: 15,
     filter: [
       "!",
-      ["in", ["to-number", ["get", "Layer"]], ["literal", [3001, 3003, 6101, 7301, 7302, 7303, 7304, 7305, 7306, 7307, 7308, 7309, 7311, 7312]]],
+      ["in", ["to-number", ["get", "Code"]], ["literal", [3001, 3003, 6101, 7301, 7302, 7303, 7304, 7305, 7306, 7307, 7308, 7309, 7311, 7312]]],
     ],
     layout: {
       "text-field": ["coalesce", ["get", "Text"], ""],
@@ -287,7 +287,7 @@ map.on("load", () => {
     minzoom: 12,
     maxzoom: 15,
     filter: [
-      "in", ["to-number", ["get", "Layer"]], ["literal", [3001, 3003, 6101, 7301, 7302, 7303, 7304, 7305, 7306, 7307, 7308, 7309, 7311, 7312]],
+      "in", ["to-number", ["get", "Code"]], ["literal", [3001, 3003, 6101, 7301, 7302, 7303, 7304, 7305, 7306, 7307, 7308, 7309, 7311, 7312]],
     ],
     layout: {
       "text-field": ["coalesce", ["get", "Text"], ""],
@@ -348,7 +348,7 @@ map.on("load", () => {
     source: "kihonzu_2500",
     "source-layer": "kihonzu_2500_line",
     minzoom: 15,
-    filter: ["==", ["to-number", ["get", "Layer"]], 2213],
+    filter: ["==", ["to-number", ["get", "Code"]], 2213],
     layout: { visibility: "visible" },
     paint: {
       "line-color": "#000000",
@@ -365,7 +365,7 @@ map.on("load", () => {
     minzoom: 15,
     filter: [
       "in",
-      ["to-number", ["get", "Layer"]],
+      ["to-number", ["get", "Code"]],
       ["literal", [7101, 7102, 7103, 7104]],
     ],
     layout: { visibility: "visible" },
@@ -383,7 +383,7 @@ map.on("load", () => {
     minzoom: 15,
     filter: [
       "in",
-      ["to-number", ["get", "Layer"]],
+      ["to-number", ["get", "Code"]],
       ["literal", [3001, 3002, 3003, 3004]],
     ],
     layout: { visibility: "visible" },
@@ -401,9 +401,9 @@ map.on("load", () => {
     minzoom: 15,
     filter: [
       "all",
-      ["!=", ["to-number", ["get", "Layer"]], 2213],
-      ["!", ["in", ["to-number", ["get", "Layer"]], ["literal", [7101, 7102, 7103, 7104]]]],
-      ["!", ["in", ["to-number", ["get", "Layer"]], ["literal", [3001, 3002, 3003, 3004]]]],
+      ["!=", ["to-number", ["get", "Code"]], 2213],
+      ["!", ["in", ["to-number", ["get", "Code"]], ["literal", [7101, 7102, 7103, 7104]]]],
+      ["!", ["in", ["to-number", ["get", "Code"]], ["literal", [3001, 3002, 3003, 3004]]]],
     ],
     layout: { visibility: "visible" },
     paint: {
@@ -422,7 +422,7 @@ map.on("load", () => {
       "icon-image": [
         "concat",
         "dm:dm-",
-        ["to-string", ["get", "Layer"]],
+        ["to-string", ["get", "Code"]],
       ],
       "icon-size": [
         "interpolate",
@@ -432,13 +432,13 @@ map.on("load", () => {
         [
           "*",
           0.5,
-          ["case", ["==", ["to-string", ["get", "Layer"]], "2238"], 0.4, 1.0],
+          ["case", ["==", ["to-string", ["get", "Code"]], "2238"], 0.4, 1.0],
         ],
         18,
         [
           "*",
           1,
-          ["case", ["==", ["to-string", ["get", "Layer"]], "2238"], 0.4, 1.0],
+          ["case", ["==", ["to-string", ["get", "Code"]], "2238"], 0.4, 1.0],
         ],
       ],
       "icon-allow-overlap": true,
@@ -457,7 +457,7 @@ map.on("load", () => {
       "text-field": ["coalesce", ["get", "Text"], ""],
       "text-size": [
         "case",
-        ["in", ["to-number", ["get", "Layer"]], ["literal", [7312, 7101]]],
+        ["in", ["to-number", ["get", "Code"]], ["literal", [7312, 7101]]],
         9,
         14,
       ],

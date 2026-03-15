@@ -69,19 +69,19 @@ PMTilesファイルはAmazon S3（`pmtiles-data.s3.ap-northeast-1.amazonaws.com`
 |-----------|------|--------:|--------:|
 | kihonzu_10000_polygon_fill | 面（塗り） | 2 | 15 |
 | kihonzu_10000_polygon_outline | 面（輪郭） | 2 | 15 |
-| kihonzu_10000_line_sidewalk | 線（歩道: Layer 2213） | 2 | 15 |
-| kihonzu_10000_line_contour | 線（等高線: Layer 7101〜7104） | 12 | 15 |
-| kihonzu_10000_line_building | 線（建物: Layer 3001〜3004） | 13 | 15 |
+| kihonzu_10000_line_sidewalk | 線（歩道: Code 2213） | 2 | 15 |
+| kihonzu_10000_line_contour | 線（等高線: Code 7101〜7104） | 12 | 15 |
+| kihonzu_10000_line_building | 線（建物: Code 3001〜3004） | 13 | 15 |
 | kihonzu_10000_line_other | 線（その他） | 2 | 15 |
 | kihonzu_10000_symbol | 記号 | 13 | 15 |
 | kihonzu_10000_annotation | 注記（基準点等を除く） | 13 | 15 |
 | kihonzu_10000_annotation_kijunten | 注記（基準点等） | 12 | 15 |
 
-**基準点等注記（`kihonzu_10000_annotation_kijunten`）の対象 Layer**
+**基準点等注記（`kihonzu_10000_annotation_kijunten`）の対象 Code**
 
 等高線と同じ z12 から表示する注記。
 
-| Layer | 名称 |
+| Code | 名称 |
 |------:|------|
 | 3001 | 普通建物 |
 | 3003 | 普通無壁舎 |
