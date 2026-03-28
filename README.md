@@ -2,7 +2,7 @@
 
 静岡市の都市計画基本図（1/10,000・1/2,500）をベクトルタイル化し、国土地理院の最適化ベクトルタイル（標準地図風）およびCS立体図と重ね合わせて表示するWebマップ。
 
-- **デモ**: https://shiwaku.github.io/city-shizuoka-kihonzu-on-dm/
+- **デモ**: https://shiwaku.github.io/city-plan-dm-viewer/
 
 ---
 
@@ -21,9 +21,10 @@
 Node.js が必要です。
 
 ```bash
-npm install   # 依存パッケージのインストール
-npm run dev   # 開発サーバー起動 → http://localhost:5173/
-npm run build # 本番ビルド
+npm install      # 依存パッケージのインストール
+npm run dev      # 開発サーバー起動 → http://localhost:5174/
+npm run build    # 本番ビルド
+npm run deploy   # GitHub Pages へデプロイ（gh-pages ブランチ）
 ```
 
 ### 使用技術
