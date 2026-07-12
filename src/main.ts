@@ -34,9 +34,6 @@ map.addControl(
 map.addControl(
   new maplibregl.AttributionControl({
     compact: true,
-    customAttribution:
-      '<a href="https://twitter.com/shi__works" target="_blank">X(旧Twitter)</a> | ' +
-      '<a href="https://github.com/shiwaku/city-shizuoka-kihonzu-on-dm" target="_blank">GitHub</a> | ',
   }),
 );
 
@@ -80,7 +77,7 @@ map.on("load", () => {
   // 都市計画基本図ソース（1/10000: z2-z14）
   map.addSource("kihonzu", {
     type: "vector",
-    url: "pmtiles://https://pmtiles-data.s3.ap-northeast-1.amazonaws.com/city-shizuoka/kihonzu_10000.pmtiles",
+    url: "pmtiles://https://shiworks2.xsrv.jp/shizuoka-city/kihonzu_10000.pmtiles",
     attribution:
       '<a href="https://data.bodik.jp/dataset/221007_1712212695" target="_blank">測量法第44条に基づき、静岡市長の承認を得て1/2,500および1/10,000都市計画基本図を加工して作成（承認番号：07静都都第2068号）</a>',
   });
@@ -88,7 +85,7 @@ map.on("load", () => {
   // 都市計画基本図ソース（1/2500: z14-z16）
   map.addSource("kihonzu_2500", {
     type: "vector",
-    url: "pmtiles://https://pmtiles-data.s3.ap-northeast-1.amazonaws.com/city-shizuoka/kihonzu_2500.pmtiles",
+    url: "pmtiles://https://shiworks2.xsrv.jp/shizuoka-city/kihonzu_2500.pmtiles",
     attribution:
       '<a href="https://data.bodik.jp/dataset/221007_1712212695" target="_blank">測量法第44条に基づき、静岡市長の承認を得て1/2,500および1/10,000都市計画基本図を加工して作成（承認番号：07静都都第2068号）</a>',
   });
@@ -98,7 +95,7 @@ map.on("load", () => {
     id: "shizuoka-cs",
     type: "raster",
     source: "shizuoka-cs",
-    layout: { visibility: "visible" },
+    layout: { visibility: "none" },
     paint: { "raster-opacity": 1 },
   });
 

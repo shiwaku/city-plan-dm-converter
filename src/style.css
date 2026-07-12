@@ -9,18 +9,21 @@ html, body {
   height: 100%;
 }
 
-/* ===== Layer Control Panel (kepler.gl style) ===== */
+/* ===== Layer Control Panel (light glass) ===== */
 #layer-control {
   position: absolute;
   top: 12px;
   left: 12px;
-  background: #1e2026;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 4px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.12), 0 1px 2px rgba(15, 23, 42, 0.06);
   z-index: 1;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  min-width: 220px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+    Arial, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  min-width: 210px;
   overflow: hidden;
 }
 
@@ -29,17 +32,16 @@ html, body {
   align-items: center;
   gap: 8px;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #a0a7b4;
-  padding: 12px 16px 10px;
-  background: #161920;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #64748b;
+  padding: 13px 16px 11px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 .layer-control-title svg {
-  color: #6a7485;
+  color: #3b82f6;
 }
 
 .layer-control-item {
@@ -48,17 +50,12 @@ html, body {
   gap: 0;
   cursor: pointer;
   padding: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   position: relative;
   transition: background 0.15s;
 }
 
-.layer-control-item:last-child {
-  border-bottom: none;
-}
-
 .layer-control-item:hover {
-  background: #272b34;
+  background: rgba(15, 23, 42, 0.04);
 }
 
 /* 元のcheckboxは非表示 */
@@ -66,63 +63,37 @@ html, body {
   display: none;
 }
 
-/* 左端のカラーバー */
-.layer-control-item::before {
-  content: "";
-  display: block;
-  width: 3px;
-  height: 100%;
-  position: absolute;
-  left: 0;
-  top: 0;
-  background: #3a4050;
-  transition: background 0.2s;
-}
-
-.layer-control-item:first-of-type::before {
-  background: #7B61FF;
-}
-
-.layer-control-item:last-of-type::before {
-  background: #18D9B5;
-}
-
-.layer-control-item:has(input:not(:checked))::before {
-  opacity: 0.25;
-}
-
 .layer-control-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 44px;
-  color: #6a7485;
+  width: 44px;
+  height: 46px;
+  color: #94a3b8;
   flex-shrink: 0;
-  padding-left: 4px;
   transition: color 0.2s;
 }
 
 .layer-control-label {
   flex: 1;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  color: #f0f0f0;
+  color: #334155;
   white-space: nowrap;
   padding: 0 8px 0 0;
   transition: color 0.2s;
 }
 
 .layer-control-item:has(input:not(:checked)) .layer-control-label {
-  color: #6a7485;
+  color: #94a3b8;
 }
 
 /* トグルスイッチ */
 .toggle-switch {
-  width: 28px;
-  height: 16px;
-  border-radius: 8px;
-  background: #3a4050;
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+  background: #cbd5e1;
   flex-shrink: 0;
   position: relative;
   margin-right: 14px;
@@ -133,32 +104,23 @@ html, body {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background: #6a7485;
-  transition: left 0.2s cubic-bezier(0.34, 1.4, 0.64, 1), background 0.2s;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+  transition: left 0.2s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
 /* チェック時 */
-.layer-control-item:first-of-type:has(input:checked) .toggle-switch {
-  background: rgba(123, 97, 255, 0.35);
+.layer-control-item:has(input:checked) .toggle-switch {
+  background: #3b82f6;
 }
 
-.layer-control-item:first-of-type:has(input:checked) .toggle-thumb {
-  left: 14px;
-  background: #7B61FF;
-}
-
-.layer-control-item:last-of-type:has(input:checked) .toggle-switch {
-  background: rgba(24, 217, 181, 0.25);
-}
-
-.layer-control-item:last-of-type:has(input:checked) .toggle-thumb {
-  left: 14px;
-  background: #18D9B5;
+.layer-control-item:has(input:checked) .toggle-thumb {
+  left: 16px;
 }
 
 .layer-control-item:has(input:checked) .layer-control-icon {
-  color: #a0a7b4;
+  color: #3b82f6;
 }

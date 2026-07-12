@@ -51,7 +51,7 @@ npm run deploy   # GitHub Pages へデプロイ（gh-pages ブランチ）
     └── style.css           # スタイル
 ```
 
-PMTilesファイルはAmazon S3（`pmtiles-data.s3.ap-northeast-1.amazonaws.com`）にホスティングしています。
+PMTilesファイルはレンタルサーバ（`shiworks2.xsrv.jp/shizuoka-city/`）にホスティングしています。
 
 ---
 
