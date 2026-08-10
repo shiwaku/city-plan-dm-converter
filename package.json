@@ -2,7 +2,7 @@
   "name": "dm-converter",
   "version": "1.0.0",
   "description": "DM（数値地形図データファイル）をGeoJSON形式に変換するツール",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "main": "src/index.js",
   "engines": {
     "node": ">=18"

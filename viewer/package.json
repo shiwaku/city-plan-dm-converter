@@ -1,7 +1,9 @@
 {
-  "name": "city-shizuoka-kihonzu-on-dm",
+  "name": "dm-converter-viewer",
   "version": "1.0.0",
   "private": true,
+  "description": "都市計画基本図（DMデータ）の変換結果を表示するWebビューワ",
+  "license": "Apache-2.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
