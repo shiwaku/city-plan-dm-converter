@@ -1,6 +1,9 @@
 # 依存パッケージ
 node_modules/
 
+# ビューワのビルド成果物
+viewer/dist/
+
 # DMデータ・入力フォルダ
 input/
 
