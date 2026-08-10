@@ -1,5 +1,6 @@
 import type { LayerSpecification, SourceSpecification } from 'maplibre-gl'
 import { DM_SPRITE_ID } from './basemap'
+import { codeName } from './dmCodes'
 
 const PMTILES_BASE = 'https://shiworks2.xsrv.jp/shizuoka-city'
 
@@ -488,9 +489,19 @@ const ATTR_LABELS: Record<string, string> = {
 }
 
 export function popupHtml(groupName: string, props: Record<string, unknown>): string {
-  const rows = Object.entries(props)
-    .filter(([, v]) => v !== null && v !== undefined && v !== '')
-    .map(([k, v]) => `<tr><th>${ATTR_LABELS[k] ?? k}</th><td>${String(v)}</td></tr>`)
-    .join('')
-  return `<div class="pop"><div class="pop-head">${groupName}</div><table class="pop-tbl">${rows}</table></div>`
+  const row = (label: string, value: unknown): string =>
+    `<tr><th>${label}</th><td>${String(value)}</td></tr>`
+
+  const parts: string[] = []
+  // 分類コードの直後に名称を出す。コードだけでは地物種別が分からないため。
+  if (props.Code !== undefined && props.Code !== '') {
+    parts.push(row(ATTR_LABELS.Code, props.Code))
+    const name = codeName(props.Code)
+    parts.push(row('名称', name ?? '（標準図式に記載なし）'))
+  }
+  for (const [k, v] of Object.entries(props)) {
+    if (k === 'Code' || v === null || v === undefined || v === '') continue
+    parts.push(row(ATTR_LABELS[k] ?? k, v))
+  }
+  return `<div class="pop"><div class="pop-head">${groupName}</div><table class="pop-tbl">${parts.join('')}</table></div>`
 }
