@@ -12,13 +12,6 @@ export const SCALE_SWITCH_ZOOM = 15
 // ---- ソース ----
 
 export const SOURCES: Record<string, SourceSpecification> = {
-  'shizuoka-cs': {
-    type: 'raster',
-    tiles: ['https://shiworks.xsrv.jp/raster-tiles/pref-shizuoka/shizuoka-cs-tiles/{z}/{x}/{y}.png'],
-    tileSize: 256,
-    attribution:
-      "<a href='https://www.geospatial.jp/ckan/dataset/shizuoka-2023-csmap' target='_blank' rel='noopener'>静岡県CS立体図</a>",
-  },
   kihonzu: {
     type: 'vector',
     url: `pmtiles://${PMTILES_BASE}/kihonzu_10000.pmtiles`,
@@ -33,7 +26,7 @@ export const SOURCES: Record<string, SourceSpecification> = {
 
 // ---- グループ（パネルのトグル単位） ----
 
-export type GroupKey = 'cs' | 'polygon' | 'line' | 'symbol' | 'direction' | 'annotation'
+export type GroupKey = 'polygon' | 'line' | 'symbol' | 'direction' | 'annotation'
 
 export interface LayerGroup {
   key: GroupKey
@@ -45,13 +38,6 @@ export interface LayerGroup {
 
 /** 配列の順序がパネルの並び順。 */
 export const GROUPS: LayerGroup[] = [
-  {
-    key: 'cs',
-    name: 'CS立体図',
-    desc: '静岡県が公開するCS立体図。曲率と傾斜を合成した陰影図で、微地形の判読に使う。都市計画基本図の下に敷かれる。',
-    on: false,
-    opacity: 1,
-  },
   {
     key: 'polygon',
     name: '面',
@@ -178,12 +164,6 @@ const iconSize = (z1: number, s1: number, z2: number, s2: number): unknown[] => 
  */
 export function buildLayers(): LayerEntry[] {
   const e: LayerEntry[] = []
-
-  e.push({
-    group: 'cs',
-    opacity: { 'raster-opacity': 1 },
-    spec: { id: 'shizuoka-cs', type: 'raster', source: 'shizuoka-cs', paint: { 'raster-opacity': 1 } },
-  })
 
   // ---- 1/10,000（z2〜z15） ----
   const S = 'kihonzu'

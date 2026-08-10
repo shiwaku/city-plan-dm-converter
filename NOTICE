@@ -62,8 +62,5 @@ DMデータは測量法（昭和24年法律第188号）に基づく公共測量�
   国土地理院 地理院タイル（全国最新写真）
   https://maps.gsi.go.jp/development/ichiran.html
 
-  静岡県 CS立体図
-  https://www.geospatial.jp/ckan/dataset/shizuoka-2023-csmap
-
   smartcity-dm-sprite（地図記号スプライト）
   https://github.com/geolonia/smartcity-dm-sprite
