@@ -1,4 +1,4 @@
-# city-plan-dm-converter
+# dm-converter
 
 ## 概要
 
@@ -28,7 +28,7 @@ DM（数値地形図データファイル）をGeoJSON形式に変換します�
 ## ディレクトリ構成
 
 ```
-city-plan-dm-converter/
+dm-converter/
 ├── index.js          # メインスクリプト
 ├── dm.js             # DMファイル読み込みクラス
 ├── dmfiles.js        # DMファイルリスト管理クラス
