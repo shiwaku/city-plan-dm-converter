@@ -134,6 +134,34 @@ class DM {
           dictSeqno++;
           recno += recordcnt + 1;
 
+        } else if (curRectype === 'E6') {
+          // 方向（E6）
+          // 起点と方向点の2点で1件。第1点が地物の位置、第1点→第2点が向きを表す。
+          // 2点間の距離は図上の記号長に相当する定型値であり実長ではないため、
+          // 線としては出力せず、起点のみを点として持ち角度に変換する。
+          const rec2 = lines[recno + 1];
+          if (!rec2) break;
+          // 代表点座標（センチメートルからメートルに変換）
+          const x1 = parseFloat(decode(rec2, 0, 7)) / 100;
+          const y1 = parseFloat(decode(rec2, 7, 14)) / 100;
+          const x2 = parseFloat(decode(rec2, 14, 21)) / 100;
+          const y2 = parseFloat(decode(rec2, 21, 28)) / 100;
+          // DMのXは北方向、Yは東方向。水平右（東）を0度とする反時計回りの度数に直す。
+          // E7（注記）のANGLEと同じ規約に揃えてあるため、描画側は同じ変換で扱える。
+          const angle = Math.round(Math.atan2(x2 - x1, y2 - y1) * 180 / Math.PI);
+          this._elementDict[dictSeqno] = {
+            FIGTYPE: curRectype,
+            LAYER: layercode,
+            ELNO: elno,
+            XYList: [ldy + y1, ldx + x1],
+            ANGLE: angle,
+            RECORD_TYPE: curRectype,
+            DATA_KIND: datakind,
+            DATA_TYPE: datatype
+          };
+          dictSeqno++;
+          recno += recordcnt + 1;
+
         } else if (curRectype === 'E7') {
           // 注記（E7）
           // 代表点座標（センチメートルからメートルに変換）
