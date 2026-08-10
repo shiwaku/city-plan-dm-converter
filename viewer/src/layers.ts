@@ -33,7 +33,7 @@ export const SOURCES: Record<string, SourceSpecification> = {
 
 // ---- グループ（パネルのトグル単位） ----
 
-export type GroupKey = 'cs' | 'polygon' | 'line' | 'symbol' | 'annotation'
+export type GroupKey = 'cs' | 'polygon' | 'line' | 'symbol' | 'direction' | 'annotation'
 
 export interface LegendItem {
   label: string
@@ -86,6 +86,14 @@ export const GROUPS: LayerGroup[] = [
     on: true,
     opacity: 1,
     legend: [{ label: '地図記号', css: 'background:var(--accent);border-radius:50%' }],
+  },
+  {
+    key: 'direction',
+    name: '方向',
+    desc: 'DMの方向要素（E6）。坑口・鳥居・流水方向など、向きを持つ地図記号。角度属性に従って記号を回転させて表示する。',
+    on: true,
+    opacity: 1,
+    legend: [{ label: '方向つき記号', css: 'background:var(--accent);border-radius:2px' }],
   },
   {
     key: 'annotation',
@@ -142,6 +150,21 @@ const TEXT_ROTATE = [
     ['*', -1, ['var', 'a']],
   ],
 ] as unknown as LayerSpecification
+
+/**
+ * 方向（E6）の回転角。
+ * Angle は水平右（東）を0度とする反時計回り、MapLibre の icon-rotate は
+ * 北を0度とする時計回りのため、90 - Angle で変換する。
+ * スプライトのアイコンが上（北）向きに描かれていることを前提とする。
+ */
+const ICON_ROTATE = ['-', 90, ['coalesce', ['to-number', ['get', 'Angle']], 0]]
+
+/**
+ * 方向要素のうち、スプライトにアイコンが存在する分類コード。
+ * 5227（せき）・7212（露岩）・2219（道路のトンネル）は未収録のため除外する。
+ * 除外しないと MapLibre が画像の読み込み失敗を毎タイル報告する。
+ */
+const DIRECTION_CODES = [4219, 5241, 4207, 7213, 4205, 5228, 5226, 3401, 7206]
 
 const CONTOUR_CODES = [7101, 7102, 7103, 7104]
 const BUILDING_CODES = [3001, 3002, 3003, 3004]
@@ -282,6 +305,29 @@ export function buildLayers(): LayerEntry[] {
       paint: { 'icon-opacity': 1 },
     },
   })
+  e.push({
+    group: 'direction',
+    opacity: { 'icon-opacity': 1 },
+    spec: {
+      id: 'kihonzu_10000_direction',
+      type: 'symbol',
+      source: S,
+      'source-layer': 'kihonzu_10000_direction',
+      minzoom: 13,
+      maxzoom: SCALE_SWITCH_ZOOM,
+      filter: ['in', ['to-number', ['get', 'Code']], ['literal', DIRECTION_CODES]] as never,
+      layout: {
+        'icon-image': ['concat', `${DM_SPRITE_ID}:dm-`, ['to-string', ['get', 'Code']]] as never,
+        'icon-size': iconSize(13, 0.5, 14, 0.75) as never,
+        'icon-rotate': ICON_ROTATE as never,
+        'icon-rotation-alignment': 'map',
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+      },
+      paint: { 'icon-opacity': 1 },
+    },
+  })
+
   for (const [id, minzoom, kijunten] of [
     ['kihonzu_10000_annotation', 13, false],
     ['kihonzu_10000_annotation_kijunten', 12, true],
@@ -413,6 +459,28 @@ export function buildLayers(): LayerEntry[] {
       paint: { 'icon-opacity': 1 },
     },
   })
+  e.push({
+    group: 'direction',
+    opacity: { 'icon-opacity': 1 },
+    spec: {
+      id: 'kihonzu_2500_direction',
+      type: 'symbol',
+      source: T,
+      'source-layer': 'kihonzu_2500_direction',
+      minzoom: SCALE_SWITCH_ZOOM,
+      filter: ['in', ['to-number', ['get', 'Code']], ['literal', DIRECTION_CODES]] as never,
+      layout: {
+        'icon-image': ['concat', `${DM_SPRITE_ID}:dm-`, ['to-string', ['get', 'Code']]] as never,
+        'icon-size': iconSize(14, 0.5, 18, 1) as never,
+        'icon-rotate': ICON_ROTATE as never,
+        'icon-rotation-alignment': 'map',
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+      },
+      paint: { 'icon-opacity': 1 },
+    },
+  })
+
   e.push({
     group: 'annotation',
     opacity: { 'text-opacity': 1 },
