@@ -467,13 +467,21 @@ body {
   border-top-color: var(--line);
 }
 
-.maplibregl-ctrl-attrib {
+/* MapLibre 標準の .maplibregl-ctrl-attrib.maplibregl-compact（背景 #fff / 文字 #000）は
+   詳細度が高くクラス1つでは上書きできない。同じ詳細度で当ててテーマ色を効かせる。 */
+.maplibregl-ctrl.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-attrib.maplibregl-compact {
   background: var(--surface);
   color: var(--ink-2);
 }
 
 .maplibregl-ctrl-attrib a {
   color: var(--ink-2);
+}
+
+.maplibregl-ctrl-attrib a:hover {
+  color: var(--ink);
+  text-decoration: underline;
 }
 
 :root[data-theme='dark'] .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
