@@ -20,7 +20,8 @@ city-plan-dm-converter/
 ├── package.json
 ├── input/
 │   ├── 2500/         # 縮尺1/2500のDMファイル（*.dm）を配置
-│   └── 10000/        # 縮尺1/10000のDMファイル（*.dm）を配置
+│   ├── 10000/        # 縮尺1/10000のDMファイル（*.dm）を配置
+│   └── 25000/        # 縮尺1/25000のDMファイル（*.dm）を配置
 └── output/           # 変換後のGeoJSONファイルが出力される
 ```
 
@@ -41,6 +42,9 @@ node index.js
 # 縮尺1/10000
 node index.js --scale 10000
 
+# 縮尺1/25000（自治体によっては1/25000で整備されている）
+node index.js --scale 25000
+
 # 入力座標系を指定する場合
 node index.js --epsg 6675
 
@@ -52,9 +56,11 @@ node index.js --scale 2500 --input /path/to/dm_folder
 
 | オプション | デフォルト | 説明 |
 |---|---|---|
-| `--scale` | `2500` | 縮尺（出力ファイル名に使用） |
+| `--scale` | `2500` | 縮尺（入力フォルダ名と出力ファイル名に使用） |
 | `--epsg` | `6676` | 入力データの座標参照系（EPSGコード） |
 | `--input` | `input/<scale>/` | DMファイルが格納されたフォルダ |
+
+`--scale` は入出力パスのラベルにのみ使われ、パース処理や座標変換には影響しません。DMデータの座標は図郭南西端座標＋センチメートル単位の相対値という実座標で格納されているため、正の整数であれば任意の縮尺（1/500、1/5000、1/25000 など）を指定できます。
 
 ### 出力ファイル
 
@@ -140,6 +146,14 @@ for %f in (*.geojson) do ogr2ogr -f Parquet "%~nf.parquet" "%f"
 
 出力したGeoJSONから[tippecanoe](https://github.com/felt/tippecanoe)と[pmtiles](https://github.com/protomaps/go-pmtiles)を使ってベクトルタイルを作成できます。
 
+縮尺ごとにズーム範囲を重ならないよう割り当て、最後に `tile-join` で1ファイルに結合します。
+
+| 縮尺 | ズーム範囲 |
+|---|---|
+| 1/25000 | Z2〜Z12 |
+| 1/10000 | Z13〜Z14 |
+| 1/2500 | Z15〜Z16 |
+
 ### 1/2500 → MBTiles
 
 ```bash
@@ -161,7 +175,7 @@ tippecanoe \
 ```bash
 tippecanoe \
   -o kihonzu_10000.mbtiles \
-  -Z2 -z14 \
+  -Z13 -z14 \
   -r1 \
   --no-feature-limit \
   --no-tile-size-limit \
@@ -172,19 +186,37 @@ tippecanoe \
   -L kihonzu_10000_annotation:都市計画基本図_10000_注記.geojson
 ```
 
+### 1/25000 → MBTiles
+
+```bash
+tippecanoe \
+  -o kihonzu_25000.mbtiles \
+  -Z2 -z12 \
+  -r1 \
+  --no-feature-limit \
+  --no-tile-size-limit \
+  --force \
+  -L kihonzu_25000_line:都市計画基本図_25000_線.geojson \
+  -L kihonzu_25000_polygon:都市計画基本図_25000_面.geojson \
+  -L kihonzu_25000_symbol:都市計画基本図_25000_記号.geojson \
+  -L kihonzu_25000_annotation:都市計画基本図_25000_注記.geojson
+```
+
 ### 結合・PMTiles変換
 
 ```bash
-# 2縮尺を1ファイルに結合
+# 各縮尺を1ファイルに結合（整備されている縮尺のみ指定すればよい）
 tile-join \
   -o kihonzu.mbtiles \
   --force \
   --no-tile-size-limit \
+  kihonzu_25000.mbtiles \
   kihonzu_10000.mbtiles \
   kihonzu_2500.mbtiles
 
 # PMTilesに変換
 pmtiles convert kihonzu.mbtiles kihonzu.pmtiles
+pmtiles convert kihonzu_25000.mbtiles kihonzu_25000.pmtiles
 pmtiles convert kihonzu_10000.mbtiles kihonzu_10000.pmtiles
 pmtiles convert kihonzu_2500.mbtiles kihonzu_2500.pmtiles
 ```
