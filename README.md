@@ -86,6 +86,10 @@ dm-converter/
 │   ├── 10000/            # 縮尺1/10000
 │   └── 25000/            # 縮尺1/25000
 ├── output/               # 変換後のGeoJSONが出力される。Git管理対象外
+├── viewer/               # 変換結果を確認するWebビューワ（Vite + MapLibre）
+├── .github/
+│   └── workflows/
+│       └── deploy-viewer.yml   # ビューワをGitHub Pagesへデプロイ
 ├── package.json
 ├── package-lock.json
 ├── README.md
@@ -230,13 +234,17 @@ for %f in (*.geojson) do ogr2ogr -f Parquet "%~nf.parquet" "%f"
 
 出力したGeoJSONから[tippecanoe](https://github.com/felt/tippecanoe)と[pmtiles](https://github.com/protomaps/go-pmtiles)を使ってベクトルタイルを作成できます。
 
-縮尺ごとにズーム範囲を重ならないよう割り当て、最後に `tile-join` で1ファイルに結合します。
+縮尺ごとに別々の PMTiles を作成し、表示側で切り替えるのが基本の構成です（[viewer/](viewer/) はこの方式）。
 
-| 縮尺 | ズーム範囲 | 最大ZL |
-|---|---|---|
-| 1/25,000 | Z2〜Z12 | 12 |
-| 1/10,000 | Z13〜Z14 | 14 |
-| 1/2,500 | Z15〜Z16 | 16 |
+| 縮尺 | tippecanoe のズーム範囲 | 最大ZL | ビューワでの表示範囲 |
+|---|---|---|---|
+| 1/25,000 | `-Z2 -z12` | 12 | — |
+| 1/10,000 | `-Z2 -z14` | 14 | z2〜z14.99 |
+| 1/2,500 | `-Z15 -z16` | 16 | z15〜 |
+
+最小ズームは、その縮尺のタイルを何倍まで引いて表示したいかで決めます。1/10,000 を `-Z2` としているのは、広域に引いた状態でも背景図として表示し続けるためです。一方 1/2,500 は z15 以上でのみ表示するため `-Z15` から作成します。
+
+各縮尺を1ファイルにまとめたい場合は `tile-join` で結合できますが、その際はズーム範囲が重複しないよう割り当て直してください（例: 1/10,000 を `-Z13 -z14` にする）。表示側で切り替える構成では重複して問題ありません。
 
 ### 最大ズームレベルの決め方
 
@@ -289,7 +297,7 @@ tippecanoe \
 ```bash
 tippecanoe \
   -o kihonzu_10000.mbtiles \
-  -Z13 -z14 \
+  -Z2 -z14 \
   -r1 \
   --no-feature-limit \
   --no-tile-size-limit \
@@ -316,10 +324,21 @@ tippecanoe \
   -L kihonzu_25000_annotation:都市計画基本図_25000_注記.geojson
 ```
 
-### 結合・PMTiles変換
+### PMTiles変換
+
+縮尺ごとに個別の PMTiles に変換します（結合しません）。表示側で縮尺を切り替えます。
 
 ```bash
-# 各縮尺を1ファイルに結合（整備されている縮尺のみ指定すればよい）
+pmtiles convert kihonzu_25000.mbtiles kihonzu_25000.pmtiles
+pmtiles convert kihonzu_10000.mbtiles kihonzu_10000.pmtiles
+pmtiles convert kihonzu_2500.mbtiles  kihonzu_2500.pmtiles
+```
+
+### 1ファイルに結合する場合（任意）
+
+配信ファイルを1つにまとめたい場合は `tile-join` で結合します。この場合は**ズーム範囲が重複しないよう tippecanoe の `-Z` を割り当て直してください**（1/25,000 → `-Z2 -z12`、1/10,000 → `-Z13 -z14`、1/2,500 → `-Z15 -z16`）。重複したまま結合すると、同じズームで複数縮尺のタイルが競合します。
+
+```bash
 tile-join \
   -o kihonzu.mbtiles \
   --force \
@@ -328,18 +347,24 @@ tile-join \
   kihonzu_10000.mbtiles \
   kihonzu_2500.mbtiles
 
-# PMTilesに変換
 pmtiles convert kihonzu.mbtiles kihonzu.pmtiles
-pmtiles convert kihonzu_25000.mbtiles kihonzu_25000.pmtiles
-pmtiles convert kihonzu_10000.mbtiles kihonzu_10000.pmtiles
-pmtiles convert kihonzu_2500.mbtiles kihonzu_2500.pmtiles
 ```
 
-## プレビュー
+## ビューワ
 
-本ツールで変換したデータを使用したプレビューサイトです。
+本ツールで変換したデータをベクトルタイル化して表示するWebビューワを [`viewer/`](viewer/) に同梱しています。静岡市の都市計画基本図（1/10,000・1/2,500）を、国土地理院の最適化ベクトルタイル（標準地図風）およびCS立体図と重ね合わせて表示します。
 
-- [city-plan-dm-viewer](https://shiwaku.github.io/city-plan-dm-viewer/)
+- **デモ**: https://shiwaku.github.io/dm-converter/
+
+```bash
+cd viewer
+npm install
+npm run dev      # http://localhost:5174/
+```
+
+レイヤー構成やスタイル定義は [viewer/README.md](viewer/README.md) を参照してください。
+
+> 旧 `shiwaku/city-plan-dm-viewer` リポジトリを履歴ごと本リポジトリに統合しました（旧URL `https://shiwaku.github.io/city-plan-dm-viewer/` は廃止）。
 
 ## データ出典
 

@@ -1,8 +1,12 @@
-# city-plan-dm-viewer
+# viewer
 
 静岡市の都市計画基本図（1/10,000・1/2,500）をベクトルタイル化し、国土地理院の最適化ベクトルタイル（標準地図風）およびCS立体図と重ね合わせて表示するWebマップ。
 
-- **デモ**: https://shiwaku.github.io/city-plan-dm-viewer/
+本ディレクトリは [dm-converter](../README.md) のサブディレクトリです。変換した GeoJSON をベクトルタイル化した結果を確認するためのビューワとして同梱しています。
+
+- **デモ**: https://shiwaku.github.io/dm-converter/
+
+> 旧 `shiwaku/city-plan-dm-viewer` リポジトリを履歴ごと統合したものです（旧URL `https://shiwaku.github.io/city-plan-dm-viewer/` は廃止）。
 
 ---
 
@@ -20,12 +24,16 @@
 
 Node.js が必要です。
 
+リポジトリルートではなく、この `viewer/` ディレクトリで実行します。
+
 ```bash
+cd viewer
 npm install      # 依存パッケージのインストール
 npm run dev      # 開発サーバー起動 → http://localhost:5174/
 npm run build    # 本番ビルド
-npm run deploy   # GitHub Pages へデプロイ（gh-pages ブランチ）
 ```
+
+GitHub Pages へのデプロイは、`viewer/` 配下の変更を main にプッシュすると `.github/workflows/deploy-viewer.yml` により自動実行されます。手動実行する場合は Actions タブから `Deploy viewer to GitHub Pages` を dispatch してください。
 
 ### 使用技術
 
@@ -41,11 +49,14 @@ npm run deploy   # GitHub Pages へデプロイ（gh-pages ブランチ）
 ## ファイル構成
 
 ```
-.
+viewer/
 ├── index.html              # マップHTML
 ├── package.json            # npm設定
+├── package-lock.json
 ├── tsconfig.json           # TypeScript設定
-├── std.json                # 最適化ベクトルタイル スタイル定義
+├── vite.config.ts          # Vite設定（base は /dm-converter/）
+├── public/
+│   └── std.json            # 最適化ベクトルタイル スタイル定義
 └── src/
     ├── main.ts             # マップ初期化・レイヤー定義
     └── style.css           # スタイル
