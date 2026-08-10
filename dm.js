@@ -45,7 +45,7 @@ class DM {
     let unitcode = '';
     let ldx = 0, ldy = 0;
 
-    while (recno < lines.length - 1) {
+    while (recno < lines.length) {
       const record = lines[recno];
       const rectype = decode(record, 0, 2);
 
@@ -56,6 +56,7 @@ class DM {
         recno++;
         // 図郭レコード(b)
         const recB = lines[recno];
+        if (!recB) break;   // 途中で終端しているファイル
         ldx = parseFloat(decode(recB, 0, 7));
         ldy = parseFloat(decode(recB, 7, 14));
         // 図郭レコード(d)までシーク
@@ -63,6 +64,7 @@ class DM {
         let cnt = 0;
         while (cnt < editcnt + 1) {
           const recD = lines[recno];
+          if (!recD) break;
           const reccnt = parseInt(decode(recD, 9, 10));
           recno += reccnt + 2;
           cnt++;
@@ -83,10 +85,12 @@ class DM {
           let pointcnt = 0;
           const xy = [];
           let rec = null;
+          let truncated = false;
           while (pointcnt < datacnt) {
             if (pointcnt % 6 === 0) {
               recno++;
               rec = lines[recno];
+              if (!rec) { truncated = true; break; }
             }
             const s = (pointcnt * 14) % 84;
             // 代表点座標（センチメートルからメートルに変換）
@@ -95,6 +99,7 @@ class DM {
             xy.push([ldy + yVal, ldx + xVal]);
             pointcnt++;
           }
+          if (truncated) break;
           // 始終点が一致していれば面化する
           if (xy[0][0] === xy[xy.length - 1][0] && xy[0][1] === xy[xy.length - 1][1]) {
             curRectype = 'E1';
@@ -135,6 +140,7 @@ class DM {
           const px = parseFloat(decode(record, 35, 42)) / 100;
           const py = parseFloat(decode(record, 42, 49)) / 100;
           const rec2 = lines[recno + 1];
+          if (!rec2) break;
           const vnflag = decode(rec2, 0, 1);
           const angle = parseInt(decode(rec2, 1, 8));
           const text = decode(rec2, 20, 84).trimEnd();
