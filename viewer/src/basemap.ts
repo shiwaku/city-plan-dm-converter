@@ -65,25 +65,26 @@ function darkenColor(str: string): string {
 }
 
 /** paint 値（文字列 or 式配列）の中の色文字列だけを再帰的に変換する。 */
-function transformValue(v: unknown): unknown {
-  if (typeof v === 'string') return parseColor(v) ? darkenColor(v) : v
-  if (Array.isArray(v)) return v.map(transformValue)
+function transformValue(v: unknown, fn: (s: string) => string): unknown {
+  if (typeof v === 'string') return parseColor(v) ? fn(v) : v
+  if (Array.isArray(v)) return v.map((x) => transformValue(x, fn))
   return v
 }
 
-function buildDarkStyle(light: StyleSpecification): StyleSpecification {
-  const style = structuredClone(light) as StyleSpecification
+/** スタイル中の色系 paint プロパティだけを一括変換する。 */
+function recolor(src: StyleSpecification, fn: (s: string) => string): StyleSpecification {
+  const style = structuredClone(src) as StyleSpecification
   for (const layer of style.layers) {
     const paint = (layer as { paint?: Record<string, unknown> }).paint
     if (!paint) continue
     for (const key of Object.keys(paint)) {
-      if (key.includes('color')) paint[key] = transformValue(paint[key])
+      if (key.includes('color')) paint[key] = transformValue(paint[key], fn)
     }
   }
   return style
 }
 
-export type Basemap = 'std' | 'photo' | 'blank'
+export type Basemap = 'pale' | 'std' | 'photo' | 'blank'
 
 // ---- 追加スプライト（都市計画基本図の記号） ----
 // MapLibre は sprite を配列で複数指定できる。接頭辞なしで参照できるのは id 'default' の
@@ -110,16 +111,23 @@ function withDmSprite(style: StyleSpecification): StyleSpecification {
 
 const GLYPHS = 'https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf'
 
-let stdLight: StyleSpecification | null = null
-let stdDark: StyleSpecification | null = null
+/** 素のスタイル（public/*.json）のキャッシュ。 */
+const rawCache = new Map<string, StyleSpecification>()
+/** `${base}-${theme}` をキーにした変換済みスタイルのキャッシュ。ダーク化は重いので一度だけ行う。 */
+const styleCache = new Map<string, StyleSpecification>()
 
-/** 地理院 最適化ベクトルタイル（標準地図風）。public/std.json を実行時に読む。 */
-async function loadStd(): Promise<StyleSpecification> {
-  if (!stdLight) {
-    const res = await fetch(`${import.meta.env.BASE_URL}std.json`)
-    stdLight = withDmSprite((await res.json()) as StyleSpecification)
-  }
-  return stdLight
+/**
+ * 地理院 最適化ベクトルタイルのスタイルを実行時に読む。
+ * pale.json（淡色地図風）と std.json（標準地図風）はレイヤーID・glyphs・sprite が
+ * 同一構成のため、切り替えても記号スプライトの注入結果は変わらない。
+ */
+async function loadRaw(name: 'pale' | 'std'): Promise<StyleSpecification> {
+  const hit = rawCache.get(name)
+  if (hit) return hit
+  const res = await fetch(`${import.meta.env.BASE_URL}${name}.json`)
+  const style = withDmSprite((await res.json()) as StyleSpecification)
+  rawCache.set(name, style)
+  return style
 }
 
 /** 地理院 全国最新写真（シームレス）ラスタスタイル。 */
@@ -162,8 +170,15 @@ function blankStyle(theme: Theme): StyleSpecification {
 export async function getBasemapStyle(base: Basemap, theme: Theme): Promise<StyleSpecification> {
   if (base === 'photo') return photoStyle()
   if (base === 'blank') return blankStyle(theme)
-  const light = await loadStd()
-  if (theme === 'light') return light
-  if (!stdDark) stdDark = buildDarkStyle(light)
-  return stdDark
+
+  const key = `${base}-${theme}`
+  const cached = styleCache.get(key)
+  if (cached) return cached
+
+  const src = await loadRaw(base)
+  // ダークテーマは、選択中のスタイルの色を明度反転して生成する。
+  const style = theme === 'dark' ? recolor(src, darkenColor) : src
+
+  styleCache.set(key, style)
+  return style
 }

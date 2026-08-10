@@ -19,7 +19,7 @@ import { applyThemeAttr, initialTheme, type Theme } from './theme'
 import './style.css'
 
 let theme: Theme = initialTheme()
-let base: Basemap = 'std'
+let base: Basemap = 'pale'
 applyThemeAttr(theme)
 
 const isMobile = window.matchMedia('(max-width: 640px)').matches
@@ -302,7 +302,8 @@ class BasemapControl implements maplibregl.IControl {
     this.el = document.createElement('div')
     this.el.className = 'maplibregl-ctrl basemap-switch'
     const defs: [Basemap, string][] = [
-      ['std', '地図'],
+      ['pale', '淡色'],
+      ['std', '標準'],
       ['photo', '写真'],
       ['blank', '白図'],
     ]
