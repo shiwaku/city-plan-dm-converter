@@ -1,38 +1,68 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-  <head>
-    <meta charset="utf-8" />
-    <title>静岡市 都市計画基本図</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-  </head>
-  <body>
-    <div id="map"></div>
-    <div id="layer-control">
-      <div class="layer-control-title">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-        Layers
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>静岡市 都市計画基本図ビューワ</title>
+  <meta name="description" content="静岡市の都市計画基本図（DMデータ）をGeoJSON経由でベクトルタイル化し、CS立体図・地理院タイルと重ねて表示するビューワ" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#2a78d6" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="都市計画基本図" />
+</head>
+<body>
+  <div id="map"></div>
+
+  <section id="panel" class="panel" aria-label="コントロールパネル">
+    <header class="panel-head">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">🗺️</span>
+        <h1>静岡市 都市計画基本図</h1>
       </div>
-      <label class="layer-control-item">
-        <input type="checkbox" id="toggle-cs" />
-        <span class="layer-control-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4V7z"/><path d="M12 3v18"/><path d="M3 7l9 4 9-4"/></svg>
-        </span>
-        <span class="layer-control-label">CS立体図</span>
-        <div class="toggle-switch">
-          <div class="toggle-thumb"></div>
+      <div class="head-actions">
+        <button id="theme-btn" class="icon-btn" type="button" title="テーマ切替" aria-label="テーマ切替"></button>
+        <button id="collapse-btn" class="icon-btn" type="button" title="パネル開閉" aria-label="パネル開閉"></button>
+      </div>
+    </header>
+
+    <div id="panel-body" class="panel-body">
+      <div class="field">
+        <div class="field-head">
+          <span class="field-label">表示中の縮尺</span>
         </div>
-      </label>
-      <label class="layer-control-item">
-        <input type="checkbox" id="toggle-kihonzu" checked />
-        <span class="layer-control-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
-        </span>
-        <span class="layer-control-label">都市計画基本図</span>
-        <div class="toggle-switch">
-          <div class="toggle-thumb"></div>
+        <div class="scale-row">
+          <span id="scale-badge" class="scale-badge">1/2,500</span>
+          <span class="scale-note">ズーム15以上で1/2,500、未満で1/10,000に自動で切り替わります</span>
         </div>
-      </label>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <span class="field-label">レイヤー</span>
+          <div class="field-actions">
+            <button id="all-on" class="mini-btn" type="button">全ON</button>
+            <button id="all-off" class="mini-btn" type="button">全OFF</button>
+          </div>
+        </div>
+        <div id="layers" class="toggles"></div>
+      </div>
     </div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+
+    <footer class="panel-foot">
+      データ: <a href="https://data.bodik.jp/dataset/221007_1712212695" target="_blank" rel="noopener">静岡市 都市計画基本図</a><br />
+      測量法第44条に基づき静岡市長の承認を得て加工（承認番号: 07静都都第2068号）<br />
+      背景: <a href="https://github.com/gsi-cyberjapan/optimal_bvmap" target="_blank" rel="noopener">国土地理院 最適化ベクトルタイル</a> / <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a><br />
+      陰影: <a href="https://www.geospatial.jp/ckan/dataset/shizuoka-2023-csmap" target="_blank" rel="noopener">静岡県 CS立体図</a><br />
+      記号: <a href="https://github.com/geolonia/smartcity-dm-sprite" target="_blank" rel="noopener">smartcity-dm-sprite</a><br />
+      変換: <a href="https://github.com/shiwaku/dm-converter" target="_blank" rel="noopener">dm-converter</a><br />
+      <span id="build-ver" class="build-ver"></span>
+    </footer>
+  </section>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
 </html>

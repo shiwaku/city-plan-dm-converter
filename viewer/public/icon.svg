@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="都市計画基本図">
+  <rect width="512" height="512" rx="96" fill="#2a78d6"/>
+  <g fill="none" stroke="#ffffff" stroke-width="18" stroke-linejoin="round" stroke-linecap="round">
+    <!-- 図郭 -->
+    <rect x="96" y="96" width="320" height="320" rx="10"/>
+    <!-- 街区（面要素） -->
+    <rect x="140" y="140" width="104" height="80" fill="rgba(255,255,255,.28)"/>
+    <rect x="286" y="140" width="86" height="80" fill="rgba(255,255,255,.28)"/>
+    <rect x="140" y="292" width="86" height="80" fill="rgba(255,255,255,.28)"/>
+    <!-- 道路（線要素） -->
+    <path d="M96 256h320"/>
+    <path d="M256 96v320"/>
+  </g>
+  <circle cx="330" cy="330" r="30" fill="#ffffff"/>
+  <circle cx="330" cy="330" r="12" fill="#2a78d6"/>
+</svg>

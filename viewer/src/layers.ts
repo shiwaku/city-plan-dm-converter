@@ -1,0 +1,465 @@
+import type { LayerSpecification, SourceSpecification } from 'maplibre-gl'
+import { DM_SPRITE_ID } from './basemap'
+
+const PMTILES_BASE = 'https://shiworks2.xsrv.jp/shizuoka-city'
+
+const DM_ATTRIBUTION =
+  '<a href="https://data.bodik.jp/dataset/221007_1712212695" target="_blank" rel="noopener">測量法第44条に基づき、静岡市長の承認を得て1/2,500および1/10,000都市計画基本図を加工して作成（承認番号：07静都都第2068号）</a>'
+
+/** 1/10,000 と 1/2,500 の表示境界。1/10,000 は未満、1/2,500 は以上を担当する。 */
+export const SCALE_SWITCH_ZOOM = 15
+
+// ---- ソース ----
+
+export const SOURCES: Record<string, SourceSpecification> = {
+  'shizuoka-cs': {
+    type: 'raster',
+    tiles: ['https://shiworks.xsrv.jp/raster-tiles/pref-shizuoka/shizuoka-cs-tiles/{z}/{x}/{y}.png'],
+    tileSize: 256,
+    attribution:
+      "<a href='https://www.geospatial.jp/ckan/dataset/shizuoka-2023-csmap' target='_blank' rel='noopener'>静岡県CS立体図</a>",
+  },
+  kihonzu: {
+    type: 'vector',
+    url: `pmtiles://${PMTILES_BASE}/kihonzu_10000.pmtiles`,
+    attribution: DM_ATTRIBUTION,
+  },
+  kihonzu_2500: {
+    type: 'vector',
+    url: `pmtiles://${PMTILES_BASE}/kihonzu_2500.pmtiles`,
+    attribution: DM_ATTRIBUTION,
+  },
+}
+
+// ---- グループ（パネルのトグル単位） ----
+
+export type GroupKey = 'cs' | 'polygon' | 'line' | 'symbol' | 'annotation'
+
+export interface LegendItem {
+  label: string
+  /** 凡例スウォッチの CSS。線は border、面は background で表現する。 */
+  css: string
+}
+
+export interface LayerGroup {
+  key: GroupKey
+  name: string
+  desc: string
+  on: boolean
+  opacity: number
+  legend: LegendItem[]
+}
+
+/** 配列の順序がパネルの並び順。 */
+export const GROUPS: LayerGroup[] = [
+  {
+    key: 'cs',
+    name: 'CS立体図',
+    desc: '静岡県が公開するCS立体図。曲率と傾斜を合成した陰影図で、微地形の判読に使う。都市計画基本図の下に敷かれる。',
+    on: false,
+    opacity: 1,
+    legend: [{ label: 'CS立体図', css: 'background:linear-gradient(90deg,#8fb08f,#d8c9a8,#b08f8f)' }],
+  },
+  {
+    key: 'polygon',
+    name: '面',
+    desc: 'DMの面要素（E1）。建物や水部などの閉じた図形。始終点が一致する線要素も面として出力される。',
+    on: true,
+    opacity: 1,
+    legend: [{ label: '面', css: 'background:rgba(255,255,255,.55);border:1px solid var(--ink)' }],
+  },
+  {
+    key: 'line',
+    name: '線',
+    desc: 'DMの線要素（E2）。道路縁・建物外形・等高線など。歩道は破線、等高線と建物は分類コードで描き分けている。',
+    on: true,
+    opacity: 1,
+    legend: [
+      { label: '一般', css: 'border-top:2px solid var(--ink)' },
+      { label: '歩道', css: 'border-top:2px dashed var(--ink)' },
+    ],
+  },
+  {
+    key: 'symbol',
+    name: '記号',
+    desc: 'DMの記号要素（E5）。公共測量標準図式の分類コード（4桁）をキーにスプライトのアイコンを表示する。',
+    on: true,
+    opacity: 1,
+    legend: [{ label: '地図記号', css: 'background:var(--accent);border-radius:50%' }],
+  },
+  {
+    key: 'annotation',
+    name: '注記',
+    desc: 'DMの注記要素（E7）。文字列を代表点に配置し、角度属性に従って回転させる。基準点等の注記は1段低いズームから表示する。',
+    on: true,
+    opacity: 1,
+    legend: [{ label: '文字注記', css: 'background:transparent;border:1px solid var(--ink-3)' }],
+  },
+]
+
+export const groupOf = (key: GroupKey): LayerGroup => GROUPS.find((g) => g.key === key)!
+
+// ---- テーマ連動のインク色 ----
+// 都市計画基本図は白図（黒線）が既定だが、暗い背景ではそのままだと埋もれるため、
+// テーマに応じて線・文字・縁取りの色を入れ替える。
+export interface Ink {
+  line: string
+  text: string
+  halo: string
+  fill: string
+}
+
+export const inkFor = (theme: 'light' | 'dark'): Ink =>
+  theme === 'dark'
+    ? { line: '#e8eaee', text: '#f2f4f7', halo: '#14161a', fill: '#ffffff' }
+    : { line: '#000000', text: '#000000', halo: '#ffffff', fill: '#ffffff' }
+
+// ---- レイヤー定義 ----
+
+export interface LayerEntry {
+  group: GroupKey
+  spec: LayerSpecification
+  /** 不透明度スライダーで操作する paint プロパティと、その基準値。 */
+  opacity: Record<string, number>
+}
+
+/**
+ * 注記に使うフォントスタック。地理院の最適化ベクトルタイルのグリフには
+ * NotoSansJP-Regular しか無いため、明示しないと MapLibre 既定の
+ * "Open Sans Regular, Arial Unicode MS Regular" を要求して404になり、文字が描画されない。
+ */
+const TEXT_FONT = ['NotoSansJP-Regular']
+
+/** 注記の回転角。本コンバーターの出力は Angle、旧タイルは KAKUDO のため両対応にする。 */
+const TEXT_ROTATE = [
+  'let',
+  'a',
+  ['coalesce', ['to-number', ['get', 'Angle']], ['to-number', ['get', 'KAKUDO']], 0],
+  [
+    'case',
+    ['any', ['==', ['var', 'a'], 90], ['==', ['var', 'a'], -90]],
+    0,
+    ['*', -1, ['var', 'a']],
+  ],
+] as unknown as LayerSpecification
+
+const CONTOUR_CODES = [7101, 7102, 7103, 7104]
+const BUILDING_CODES = [3001, 3002, 3003, 3004]
+const SIDEWALK_CODE = 2213
+/** 等高線と同じ1段低いズームから出す注記の分類コード（基準点・標高点等）。 */
+const KIJUNTEN_CODES = [3001, 3003, 6101, 7301, 7302, 7303, 7304, 7305, 7306, 7307, 7308, 7309, 7311, 7312]
+
+const lineOther = (): unknown[] => [
+  'all',
+  ['!=', ['to-number', ['get', 'Code']], SIDEWALK_CODE],
+  ['!', ['in', ['to-number', ['get', 'Code']], ['literal', CONTOUR_CODES]]],
+  ['!', ['in', ['to-number', ['get', 'Code']], ['literal', BUILDING_CODES]]],
+]
+
+const iconSize = (z1: number, s1: number, z2: number, s2: number): unknown[] => [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  z1,
+  ['*', s1, ['case', ['==', ['to-string', ['get', 'Code']], '2238'], 0.4, 1.0]],
+  z2,
+  ['*', s2, ['case', ['==', ['to-string', ['get', 'Code']], '2238'], 0.4, 1.0]],
+]
+
+/**
+ * 描画順に並べたレイヤー定義。1/10,000 は z15 未満、1/2,500 は z15 以上を担当し、
+ * ズームで自動的に入れ替わる。グループ単位で表示/不透明度を切り替える。
+ */
+export function buildLayers(): LayerEntry[] {
+  const e: LayerEntry[] = []
+
+  e.push({
+    group: 'cs',
+    opacity: { 'raster-opacity': 1 },
+    spec: { id: 'shizuoka-cs', type: 'raster', source: 'shizuoka-cs', paint: { 'raster-opacity': 1 } },
+  })
+
+  // ---- 1/10,000（z2〜z15） ----
+  const S = 'kihonzu'
+  e.push({
+    group: 'polygon',
+    opacity: { 'fill-opacity': 0.3 },
+    spec: {
+      id: 'kihonzu_10000_polygon_fill',
+      type: 'fill',
+      source: S,
+      'source-layer': 'kihonzu_10000_polygon',
+      minzoom: 2,
+      maxzoom: SCALE_SWITCH_ZOOM,
+      paint: { 'fill-color': '#ffffff', 'fill-opacity': 0.3 },
+    },
+  })
+  e.push({
+    group: 'polygon',
+    opacity: { 'line-opacity': 1 },
+    spec: {
+      id: 'kihonzu_10000_polygon_outline',
+      type: 'line',
+      source: S,
+      'source-layer': 'kihonzu_10000_polygon',
+      minzoom: 2,
+      maxzoom: SCALE_SWITCH_ZOOM,
+      paint: { 'line-color': '#000000', 'line-width': 0.3 },
+    },
+  })
+  e.push({
+    group: 'line',
+    opacity: { 'line-opacity': 1 },
+    spec: {
+      id: 'kihonzu_10000_line_sidewalk',
+      type: 'line',
+      source: S,
+      'source-layer': 'kihonzu_10000_line',
+      minzoom: 2,
+      maxzoom: SCALE_SWITCH_ZOOM,
+      filter: ['==', ['to-number', ['get', 'Code']], SIDEWALK_CODE] as never,
+      paint: { 'line-color': '#000000', 'line-width': 0.5, 'line-dasharray': [5, 5] },
+    },
+  })
+  e.push({
+    group: 'line',
+    opacity: { 'line-opacity': 1 },
+    spec: {
+      id: 'kihonzu_10000_line_contour',
+      type: 'line',
+      source: S,
+      'source-layer': 'kihonzu_10000_line',
+      minzoom: 12,
+      maxzoom: SCALE_SWITCH_ZOOM,
+      filter: ['in', ['to-number', ['get', 'Code']], ['literal', CONTOUR_CODES]] as never,
+      paint: { 'line-color': '#000000', 'line-width': 0.5 },
+    },
+  })
+  e.push({
+    group: 'line',
+    opacity: { 'line-opacity': 1 },
+    spec: {
+      id: 'kihonzu_10000_line_building',
+      type: 'line',
+      source: S,
+      'source-layer': 'kihonzu_10000_line',
+      minzoom: 13,
+      maxzoom: SCALE_SWITCH_ZOOM,
+      filter: ['in', ['to-number', ['get', 'Code']], ['literal', BUILDING_CODES]] as never,
+      paint: { 'line-color': '#000000', 'line-width': 0.5 },
+    },
+  })
+  e.push({
+    group: 'line',
+    opacity: { 'line-opacity': 1 },
+    spec: {
+      id: 'kihonzu_10000_line_other',
+      type: 'line',
+      source: S,
+      'source-layer': 'kihonzu_10000_line',
+      minzoom: 2,
+      maxzoom: SCALE_SWITCH_ZOOM,
+      filter: lineOther() as never,
+      paint: { 'line-color': '#000000', 'line-width': 0.5 },
+    },
+  })
+  e.push({
+    group: 'symbol',
+    opacity: { 'icon-opacity': 1 },
+    spec: {
+      id: 'kihonzu_10000_symbol',
+      type: 'symbol',
+      source: S,
+      'source-layer': 'kihonzu_10000_symbol',
+      minzoom: 13,
+      maxzoom: SCALE_SWITCH_ZOOM,
+      layout: {
+        'icon-image': ['concat', `${DM_SPRITE_ID}:dm-`, ['to-string', ['get', 'Code']]] as never,
+        'icon-size': iconSize(13, 0.5, 14, 0.75) as never,
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+      },
+      paint: { 'icon-opacity': 1 },
+    },
+  })
+  for (const [id, minzoom, kijunten] of [
+    ['kihonzu_10000_annotation', 13, false],
+    ['kihonzu_10000_annotation_kijunten', 12, true],
+  ] as [string, number, boolean][]) {
+    const inKijunten = ['in', ['to-number', ['get', 'Code']], ['literal', KIJUNTEN_CODES]]
+    e.push({
+      group: 'annotation',
+      opacity: { 'text-opacity': 1 },
+      spec: {
+        id,
+        type: 'symbol',
+        source: S,
+        'source-layer': 'kihonzu_10000_annotation',
+        minzoom,
+        maxzoom: SCALE_SWITCH_ZOOM,
+        filter: (kijunten ? inKijunten : ['!', inKijunten]) as never,
+        layout: {
+          'text-field': ['coalesce', ['get', 'Text'], ''] as never,
+          'text-font': TEXT_FONT,
+          'text-size': 10,
+          'text-anchor': 'center',
+          'text-offset': [1.5, -1],
+          'text-rotation-alignment': 'map',
+          'text-rotate': TEXT_ROTATE as never,
+        },
+        paint: {
+          'text-color': '#000',
+          'text-halo-color': '#fff',
+          'text-halo-width': 1.5,
+          'text-opacity': 1,
+        },
+      },
+    })
+  }
+
+  // ---- 1/2,500（z15〜） ----
+  const T = 'kihonzu_2500'
+  e.push({
+    group: 'polygon',
+    opacity: { 'fill-opacity': 0.25 },
+    spec: {
+      id: 'kihonzu_2500_polygon_fill',
+      type: 'fill',
+      source: T,
+      'source-layer': 'kihonzu_2500_polygon',
+      minzoom: SCALE_SWITCH_ZOOM,
+      paint: { 'fill-color': '#ffffff', 'fill-opacity': 0.25 },
+    },
+  })
+  e.push({
+    group: 'polygon',
+    opacity: { 'line-opacity': 1 },
+    spec: {
+      id: 'kihonzu_2500_polygon_outline',
+      type: 'line',
+      source: T,
+      'source-layer': 'kihonzu_2500_polygon',
+      minzoom: SCALE_SWITCH_ZOOM,
+      paint: { 'line-color': '#000000', 'line-width': 0.6 },
+    },
+  })
+  e.push({
+    group: 'line',
+    opacity: { 'line-opacity': 1 },
+    spec: {
+      id: 'kihonzu_2500_line_sidewalk',
+      type: 'line',
+      source: T,
+      'source-layer': 'kihonzu_2500_line',
+      minzoom: SCALE_SWITCH_ZOOM,
+      filter: ['==', ['to-number', ['get', 'Code']], SIDEWALK_CODE] as never,
+      paint: { 'line-color': '#000000', 'line-width': 0.5, 'line-dasharray': [5, 5] },
+    },
+  })
+  e.push({
+    group: 'line',
+    opacity: { 'line-opacity': 1 },
+    spec: {
+      id: 'kihonzu_2500_line_contour',
+      type: 'line',
+      source: T,
+      'source-layer': 'kihonzu_2500_line',
+      minzoom: SCALE_SWITCH_ZOOM,
+      filter: ['in', ['to-number', ['get', 'Code']], ['literal', CONTOUR_CODES]] as never,
+      paint: { 'line-color': '#000000', 'line-width': 0.5 },
+    },
+  })
+  e.push({
+    group: 'line',
+    opacity: { 'line-opacity': 1 },
+    spec: {
+      id: 'kihonzu_2500_line_building',
+      type: 'line',
+      source: T,
+      'source-layer': 'kihonzu_2500_line',
+      minzoom: SCALE_SWITCH_ZOOM,
+      filter: ['in', ['to-number', ['get', 'Code']], ['literal', BUILDING_CODES]] as never,
+      paint: { 'line-color': '#000000', 'line-width': 1 },
+    },
+  })
+  e.push({
+    group: 'line',
+    opacity: { 'line-opacity': 1 },
+    spec: {
+      id: 'kihonzu_2500_line_other',
+      type: 'line',
+      source: T,
+      'source-layer': 'kihonzu_2500_line',
+      minzoom: SCALE_SWITCH_ZOOM,
+      filter: lineOther() as never,
+      paint: { 'line-color': '#000000', 'line-width': 1 },
+    },
+  })
+  e.push({
+    group: 'symbol',
+    opacity: { 'icon-opacity': 1 },
+    spec: {
+      id: 'kihonzu_2500_symbol',
+      type: 'symbol',
+      source: T,
+      'source-layer': 'kihonzu_2500_symbol',
+      minzoom: SCALE_SWITCH_ZOOM,
+      layout: {
+        'icon-image': ['concat', `${DM_SPRITE_ID}:dm-`, ['to-string', ['get', 'Code']]] as never,
+        'icon-size': iconSize(14, 0.5, 18, 1) as never,
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+      },
+      paint: { 'icon-opacity': 1 },
+    },
+  })
+  e.push({
+    group: 'annotation',
+    opacity: { 'text-opacity': 1 },
+    spec: {
+      id: 'kihonzu_2500_annotation',
+      type: 'symbol',
+      source: T,
+      'source-layer': 'kihonzu_2500_annotation',
+      minzoom: SCALE_SWITCH_ZOOM,
+      layout: {
+        'text-field': ['coalesce', ['get', 'Text'], ''] as never,
+        'text-font': TEXT_FONT,
+        'text-size': ['case', ['in', ['to-number', ['get', 'Code']], ['literal', [7312, 7101]]], 9, 14] as never,
+        'text-anchor': 'center',
+        'text-offset': [1.5, -1],
+        'text-rotation-alignment': 'map',
+        'text-rotate': TEXT_ROTATE as never,
+      },
+      paint: {
+        'text-color': '#000',
+        'text-halo-color': '#fff',
+        'text-halo-width': 1.5,
+        'text-opacity': 1,
+      },
+    },
+  })
+
+  return e
+}
+
+/** クリック時のポップアップ本文。DMの属性を日本語見出しで並べる。 */
+const ATTR_LABELS: Record<string, string> = {
+  Code: '分類コード',
+  Elno: '要素識別番号',
+  RecordType: 'レコードタイプ',
+  DataType: 'データタイプ',
+  DataKind: '実データ区分',
+  Text: '注記文字列',
+  Vnflag: '縦横フラグ',
+  Angle: '角度',
+  KAKUDO: '角度',
+}
+
+export function popupHtml(groupName: string, props: Record<string, unknown>): string {
+  const rows = Object.entries(props)
+    .filter(([, v]) => v !== null && v !== undefined && v !== '')
+    .map(([k, v]) => `<tr><th>${ATTR_LABELS[k] ?? k}</th><td>${String(v)}</td></tr>`)
+    .join('')
+  return `<div class="pop"><div class="pop-head">${groupName}</div><table class="pop-tbl">${rows}</table></div>`
+}

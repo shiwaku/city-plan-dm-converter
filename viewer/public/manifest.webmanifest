@@ -1,0 +1,26 @@
+{
+  "name": "静岡市 都市計画基本図ビューワ",
+  "short_name": "都市計画基本図",
+  "description": "静岡市の都市計画基本図（DMデータ）をベクトルタイルで表示するビューワ",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#2a78d6",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
