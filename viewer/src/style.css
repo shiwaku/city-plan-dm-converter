@@ -352,30 +352,6 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- インライン凡例 ---- */
-.layer-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  margin: 0 8px 6px 50px;
-}
-
-.lg-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10.5px;
-  color: var(--ink-2);
-}
-
-.lg-sw {
-  /* 全幅だと線が長すぎて凡例に見えないため、短いスウォッチにする */
-  display: inline-block;
-  width: 18px;
-  height: 10px;
-  border-radius: 2px;
-}
-
 /* ---- 背景地図スイッチャー（右下） ---- */
 .basemap-switch {
   display: flex;

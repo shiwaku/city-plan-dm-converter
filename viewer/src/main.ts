@@ -167,7 +167,6 @@ function setGroupVisible(g: LayerGroup, on: boolean): void {
   }
   const item = layersDiv.querySelector<HTMLElement>(`.layer-item[data-key="${g.key}"]`)
   item?.querySelector<HTMLElement>('.layer-opacity')?.toggleAttribute('hidden', !on)
-  item?.querySelector<HTMLElement>('.layer-legend')?.toggleAttribute('hidden', !on)
 }
 
 function setGroupOpacity(g: LayerGroup, v: number): void {
@@ -272,14 +271,7 @@ function buildToggles(): void {
     })
     opac.append(range, val)
 
-    const legend = document.createElement('div')
-    legend.className = 'layer-legend'
-    legend.hidden = !g.on
-    legend.innerHTML = g.legend
-      .map((it) => `<span class="lg-row"><span class="lg-sw" style="${it.css}"></span>${it.label}</span>`)
-      .join('')
-
-    item.append(label, desc, opac, legend)
+    item.append(label, desc, opac)
     layersDiv.append(item)
   }
 }
