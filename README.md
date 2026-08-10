@@ -75,11 +75,12 @@ DMファイルは固定長のレコードが並んだテキストファイル（
 
 ```
 dm-converter/
-├── index.js          # メインスクリプト
-├── dm.js             # DMファイル読み込みクラス
-├── dmfiles.js        # DMファイルリスト管理クラス
-├── geojsonWriter.js  # GeoJSON出力クラス
-├── epsgDefs.js       # 座標参照系定義
+├── src/
+│   ├── index.js          # メインスクリプト（エントリポイント）
+│   ├── dm.js             # DMファイル読み込みクラス
+│   ├── dmfiles.js        # DMファイルリスト管理クラス
+│   ├── geojsonWriter.js  # GeoJSON出力クラス
+│   └── epsgDefs.js       # 座標参照系定義
 ├── package.json
 ├── package-lock.json
 ├── LICENSE
@@ -102,26 +103,26 @@ DMファイルを `input/<縮尺>/` フォルダに配置してから実行し�
 
 ```bash
 # 縮尺1/2500、座標系はデフォルト（EPSG:6676）
-node index.js
+node src/index.js
 
 # 縮尺1/10000
-node index.js --scale 10000
+node src/index.js --scale 10000
 
 # 縮尺1/25000（自治体によっては1/25000で整備されている）
-node index.js --scale 25000
+node src/index.js --scale 25000
 
 # 入力座標系を指定する場合
-node index.js --epsg 6675
+node src/index.js --epsg 6675
 
 # 入力フォルダを直接指定する場合
-node index.js --scale 2500 --input /path/to/dm_folder
+node src/index.js --scale 2500 --input /path/to/dm_folder
 ```
 
 よく使う2つは npm scripts でも実行できます。
 
 ```bash
-npm start            # node index.js と同じ（1/2500）
-npm run start:10000  # node index.js --scale 10000 と同じ
+npm start            # node src/index.js と同じ（1/2500）
+npm run start:10000  # node src/index.js --scale 10000 と同じ
 ```
 
 ### オプション
