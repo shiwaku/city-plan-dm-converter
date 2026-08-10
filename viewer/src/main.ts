@@ -133,7 +133,7 @@ function applyInk(): void {
   const ink = inkFor(theme)
   for (const entry of LAYERS) {
     const id = entry.spec.id
-    if (id === 'shizuoka-cs' || !map.getLayer(id)) continue
+    if (!map.getLayer(id)) continue
     switch (entry.spec.type) {
       case 'line':
         map.setPaintProperty(id, 'line-color', ink.line)
@@ -338,7 +338,7 @@ map.on('zoom', renderScaleBadge)
 
 // ---- ホバーカーソル（マウス環境のみ） ----
 const visibleLayerIds = (): string[] =>
-  LAYERS.filter((l) => l.group !== 'cs' && groupOf(l.group).on)
+  LAYERS.filter((l) => groupOf(l.group).on)
     .map((l) => l.spec.id)
     .filter((id) => map.getLayer(id))
 
