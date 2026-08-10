@@ -9,7 +9,10 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "start:10000": "node src/index.js --scale 10000"
+    "start:10000": "node src/index.js --scale 10000",
+    "build": "bash scripts/build.sh",
+    "build:2500": "bash scripts/build.sh 2500",
+    "build:10000": "bash scripts/build.sh 10000"
   },
   "dependencies": {
     "iconv-lite": "^0.6.3",

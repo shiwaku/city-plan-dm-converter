@@ -2,7 +2,7 @@
 
 ## 概要
 
-DM（数値地形図データファイル）をGeoJSON形式に変換します。線・面・記号・注記の4種類に分割して出力します。
+DM（数値地形図データファイル）をGeoJSON形式に変換します。線・面・記号・方向・注記の5種類に分割して出力します。
 
 出力したGeoJSONは、QGIS等での地図表示のほか、tippecanoe・pmtiles によるベクトルタイル化を経て Web地図の背景地図として利用できます。
 
@@ -90,6 +90,8 @@ dm-converter/
 ├── .github/
 │   └── workflows/
 │       └── deploy-viewer.yml   # ビューワをGitHub Pagesへデプロイ
+├── scripts/
+│   └── build.sh          # GeoJSON+GeoParquet+PMTiles の一括生成
 ├── package.json
 ├── package-lock.json
 ├── README.md
@@ -240,17 +242,48 @@ npm run start:10000  # node src/index.js --scale 10000 と同じ
 
 旧日本測地系（Tokyo）はベッセル楕円体＋3パラメータによる変換で処理されます。JGD2000 と JGD2011 は同一の定義（GRS80、測地系間の補正なし）として扱っているため、両者の変換結果は一致します。
 
-## GeoParquet変換（参考）
+## 一括ビルド（GeoJSON + GeoParquet + PMTiles）
 
-[OSGeo4W](https://trac.osgeo.org/osgeo4w/)のogr2ogrを使って、出力したGeoJSONをGeoParquet形式に一括変換できます。
+GeoJSON だけ作り直して GeoParquet や PMTiles が古いまま残ると、配信データと変換結果が食い違います。`scripts/build.sh` で最後までまとめて焼き直せます。
 
-```bat
-for %f in (*.geojson) do ogr2ogr -f Parquet "%~nf.parquet" "%f"
+```bash
+npm run build                    # 1/2,500 と 1/10,000 を一括
+bash scripts/build.sh 2500       # 縮尺を指定
+bash scripts/build.sh 2500 10000 25000
 ```
+
+実行される処理は次の3段です。
+
+1. **DM → GeoJSON**（`src/index.js`）
+2. **GeoJSON → GeoParquet**（`ogr2ogr -f Parquet`）
+3. **GeoJSON → MBTiles → PMTiles**（`tippecanoe` → `pmtiles convert`）
+
+ズーム範囲は縮尺から自動で決まります（[最大ズームレベルの決め方](#最大ズームレベルの決め方)の表と同じ値）。未定義の縮尺を指定した場合はタイル生成のみスキップされ、`zoom_range` への追記を促すメッセージが出ます。
+
+### 環境変数
+
+| 変数 | 効果 |
+|---|---|
+| `EPSG=6675` | 入力データの座標参照系を指定 |
+| `SKIP_CONVERT=1` | DM→GeoJSON を飛ばし、既存のGeoJSONから後段だけ作り直す |
+| `SKIP_PARQUET=1` | GeoParquet を作らない |
+| `SKIP_TILES=1` | MBTiles / PMTiles を作らない |
+
+### 必要なツール
+
+いずれも無ければ該当する段だけスキップされ、変換自体は完了します。
+
+| ツール | 用途 |
+|---|---|
+| [OSGeo4W](https://trac.osgeo.org/osgeo4w/) の ogr2ogr | GeoParquet 生成 |
+| [tippecanoe](https://github.com/felt/tippecanoe) | ベクトルタイル生成 |
+| [go-pmtiles](https://github.com/protomaps/go-pmtiles) | PMTiles 変換 |
+
+> **GeoParquet には Parquet ドライバを持つ GDAL が必要です。** conda 版・Debian 版の GDAL は既定で Parquet ドライバを含みません。スクリプトは `PATH` 上の `ogr2ogr` を調べ、Parquet 非対応であれば WSL 環境の `C:\OSGeo4W\bin\ogr2ogr.exe` へ自動でフォールバックします（Windows形式のパスへの変換も行います）。
 
 ## ベクトルタイル作成（参考）
 
-出力したGeoJSONから[tippecanoe](https://github.com/felt/tippecanoe)と[pmtiles](https://github.com/protomaps/go-pmtiles)を使ってベクトルタイルを作成できます。
+以下は `scripts/build.sh` が内部で実行している内容です。手動で調整したい場合の参考として残しています。
 
 縮尺ごとに別々の PMTiles を作成し、表示側で切り替えるのが基本の構成です（[viewer/](viewer/) はこの方式）。
 
@@ -307,6 +340,7 @@ tippecanoe \
   -L kihonzu_2500_line:都市計画基本図_2500_線.geojson \
   -L kihonzu_2500_polygon:都市計画基本図_2500_面.geojson \
   -L kihonzu_2500_symbol:都市計画基本図_2500_記号.geojson \
+  -L kihonzu_2500_direction:都市計画基本図_2500_方向.geojson \
   -L kihonzu_2500_annotation:都市計画基本図_2500_注記.geojson
 ```
 
@@ -323,6 +357,7 @@ tippecanoe \
   -L kihonzu_10000_line:都市計画基本図_10000_線.geojson \
   -L kihonzu_10000_polygon:都市計画基本図_10000_面.geojson \
   -L kihonzu_10000_symbol:都市計画基本図_10000_記号.geojson \
+  -L kihonzu_10000_direction:都市計画基本図_10000_方向.geojson \
   -L kihonzu_10000_annotation:都市計画基本図_10000_注記.geojson
 ```
 
@@ -339,6 +374,7 @@ tippecanoe \
   -L kihonzu_25000_line:都市計画基本図_25000_線.geojson \
   -L kihonzu_25000_polygon:都市計画基本図_25000_面.geojson \
   -L kihonzu_25000_symbol:都市計画基本図_25000_記号.geojson \
+  -L kihonzu_25000_direction:都市計画基本図_25000_方向.geojson \
   -L kihonzu_25000_annotation:都市計画基本図_25000_注記.geojson
 ```
 
