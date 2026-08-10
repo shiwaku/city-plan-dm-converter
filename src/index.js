@@ -66,11 +66,13 @@ function main() {
   const outPoly = path.join(outDir, `都市計画基本図_${scale}_面.geojson`);
   const outSym  = path.join(outDir, `都市計画基本図_${scale}_記号.geojson`);
   const outTxt  = path.join(outDir, `都市計画基本図_${scale}_注記.geojson`);
+  const outDir_ = path.join(outDir, `都市計画基本図_${scale}_方向.geojson`);
 
   const wLine = new GeoJSONWriter(outLine, epsg);
   const wPoly = new GeoJSONWriter(outPoly, epsg);
   const wSym  = new GeoJSONWriter(outSym,  epsg);
   const wTxt  = new GeoJSONWriter(outTxt,  epsg);
+  const wDir  = new GeoJSONWriter(outDir_, epsg);
 
   try {
     const dmfiles = new DMFiles(dmDir);
@@ -108,6 +110,16 @@ function main() {
           wSym.setPropertie('DataKind',   dat.DATA_KIND   || '');
           wSym.write();
 
+        } else if (fig === 'E6') {
+          wDir.setGeometry(5, dat.XYList);
+          wDir.setPropertie('Code',       dat.LAYER       || '');
+          wDir.setPropertie('Elno',       dat.ELNO        || '');
+          wDir.setPropertie('Angle',      dat.ANGLE !== undefined ? dat.ANGLE : '');
+          wDir.setPropertie('RecordType', dat.RECORD_TYPE || '');
+          wDir.setPropertie('DataType',   dat.DATA_TYPE   || '');
+          wDir.setPropertie('DataKind',   dat.DATA_KIND   || '');
+          wDir.write();
+
         } else if (fig === 'E7') {
           wTxt.setGeometry(4, dat.XYList);
           wTxt.setPropertie('Code',       dat.LAYER       || '');
@@ -127,6 +139,7 @@ function main() {
     wPoly.close();
     wSym.close();
     wTxt.close();
+    wDir.close();
   }
 
   console.log('Done.');
@@ -134,6 +147,7 @@ function main() {
   console.log(outPoly);
   console.log(outSym);
   console.log(outTxt);
+  console.log(outDir_);
   console.log(`DM dir: ${dmDir}`);
   console.log(`EPSG: ${epsg}`);
 }
