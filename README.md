@@ -81,15 +81,19 @@ dm-converter/
 │   ├── dmfiles.js        # DMファイルリスト管理クラス
 │   ├── geojsonWriter.js  # GeoJSON出力クラス
 │   └── epsgDefs.js       # 座標参照系定義
+├── input/                # DMファイル（*.dm）を配置。Git管理対象外
+│   ├── 2500/             # 縮尺1/2500
+│   ├── 10000/            # 縮尺1/10000
+│   └── 25000/            # 縮尺1/25000
+├── output/               # 変換後のGeoJSONが出力される。Git管理対象外
 ├── package.json
 ├── package-lock.json
-├── LICENSE
-├── input/
-│   ├── 2500/         # 縮尺1/2500のDMファイル（*.dm）を配置
-│   ├── 10000/        # 縮尺1/10000のDMファイル（*.dm）を配置
-│   └── 25000/        # 縮尺1/25000のDMファイル（*.dm）を配置
-└── output/           # 変換後のGeoJSONファイルが出力される
+├── README.md
+├── LICENSE               # MIT（対象は変換プログラム。DMデータは対象外）
+└── .gitignore
 ```
+
+`input/` と `output/` は `.gitignore` で除外しています。DMデータは公共測量成果のため、リポジトリには含めません（[利用上の注意](#利用上の注意)を参照）。
 
 ## セットアップ
 

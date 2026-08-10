@@ -10,3 +10,6 @@ output/
 # OS・エディタ
 .DS_Store
 Thumbs.db
+
+# ツール設定（ローカル固有）
+.claude/settings.local.json
