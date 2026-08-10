@@ -4,8 +4,12 @@ import { codeName } from './dmCodes'
 
 const PMTILES_BASE = 'https://shiworks2.xsrv.jp/shizuoka-city'
 
+/**
+ * 測量成果の使用承認（07静都都第2068号）の条件(3)で明記を求められている文言。
+ * 文言は承認書で特定されているため、変更しないこと。
+ */
 const DM_ATTRIBUTION =
-  '<a href="https://data.bodik.jp/dataset/221007_1712212695" target="_blank" rel="noopener">測量法第44条に基づき、静岡市長の承認を得て1/2,500および1/10,000都市計画基本図を加工して作成（承認番号：07静都都第2068号）</a>'
+  '<a href="https://data.bodik.jp/dataset/221007_1712212695" target="_blank" rel="noopener">この地図は静岡市長の承認を得て、同市所管の2,500分の1及び10,000分の1静岡市地形図を使用して調製したものである。（承認番号07静都都第2068号）</a>'
 
 /** 1/10,000 と 1/2,500 の表示境界。1/10,000 は未満、1/2,500 は以上を担当する。 */
 export const SCALE_SWITCH_ZOOM = 15

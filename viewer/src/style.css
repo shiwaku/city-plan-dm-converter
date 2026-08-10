@@ -157,6 +157,18 @@ body {
   color: var(--ink-2);
 }
 
+.disclaimer {
+  /* 承認条件の備考: 静岡市の公式サイトと誤認されないよう明示する。
+     出典表記に埋もれないよう囲みを付ける。 */
+  margin: 0 0 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sm);
+  color: var(--ink-2);
+  font-size: 10.5px;
+  line-height: 1.6;
+}
+
 .build-ver {
   display: block;
   margin-top: 4px;
