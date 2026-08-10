@@ -409,15 +409,38 @@ body {
   overflow: hidden;
 }
 
-.maplibregl-popup-tip {
-  border-top-color: var(--surface-solid) !important;
-  border-bottom-color: var(--surface-solid) !important;
+/* tip は透明な太枠のうち「吹き出し本体と反対側の1辺」だけに色が付いて三角に見える。
+   全辺に色を付けると三角が潰れて四角になるため、MapLibre と同じくアンカー別に指定する。
+   MapLibre 側と同詳細度なので、後勝ちで !important なしに上書きできる。 */
+.maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+  border-bottom-color: var(--surface-solid);
+}
+
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+  border-top-color: var(--surface-solid);
+}
+
+.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: var(--surface-solid);
+}
+
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: var(--surface-solid);
 }
 
 .maplibregl-popup-close-button {
   color: var(--ink-3);
   font-size: 18px;
   padding: 2px 8px;
+}
+
+.maplibregl-popup-close-button:hover {
+  background-color: var(--hover);
+  color: var(--ink);
 }
 
 .pop-head {
@@ -486,6 +509,18 @@ body {
 
 :root[data-theme='dark'] .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
   filter: invert(1);
+}
+
+/* 現在地ボタンは状態を色で示す（追跡中=青 #33b5e5 / エラー=赤 #e54e33）。
+   反転させると意味が逆の色になるため、状態アイコンだけ反転から除外する。 */
+:root[data-theme='dark'] .maplibregl-ctrl-group button.maplibregl-ctrl-geolocate-active .maplibregl-ctrl-icon,
+:root[data-theme='dark'] .maplibregl-ctrl-group button.maplibregl-ctrl-geolocate-active-error .maplibregl-ctrl-icon,
+:root[data-theme='dark'] .maplibregl-ctrl-group button.maplibregl-ctrl-geolocate-background .maplibregl-ctrl-icon,
+:root[data-theme='dark']
+  .maplibregl-ctrl-group
+  button.maplibregl-ctrl-geolocate-background-error
+  .maplibregl-ctrl-icon {
+  filter: none;
 }
 
 :root[data-theme='dark'] .maplibregl-ctrl-attrib-button {
