@@ -35,19 +35,12 @@ export const SOURCES: Record<string, SourceSpecification> = {
 
 export type GroupKey = 'cs' | 'polygon' | 'line' | 'symbol' | 'direction' | 'annotation'
 
-export interface LegendItem {
-  label: string
-  /** 凡例スウォッチの CSS。線は border、面は background で表現する。 */
-  css: string
-}
-
 export interface LayerGroup {
   key: GroupKey
   name: string
   desc: string
   on: boolean
   opacity: number
-  legend: LegendItem[]
 }
 
 /** 配列の順序がパネルの並び順。 */
@@ -58,7 +51,6 @@ export const GROUPS: LayerGroup[] = [
     desc: '静岡県が公開するCS立体図。曲率と傾斜を合成した陰影図で、微地形の判読に使う。都市計画基本図の下に敷かれる。',
     on: false,
     opacity: 1,
-    legend: [{ label: 'CS立体図', css: 'background:linear-gradient(90deg,#8fb08f,#d8c9a8,#b08f8f)' }],
   },
   {
     key: 'polygon',
@@ -66,7 +58,6 @@ export const GROUPS: LayerGroup[] = [
     desc: 'DMの面要素（E1）。建物や水部などの閉じた図形。始終点が一致する線要素も面として出力される。',
     on: true,
     opacity: 1,
-    legend: [{ label: '面', css: 'background:rgba(255,255,255,.55);border:1px solid var(--ink)' }],
   },
   {
     key: 'line',
@@ -74,10 +65,6 @@ export const GROUPS: LayerGroup[] = [
     desc: 'DMの線要素（E2）。道路縁・建物外形・等高線など。歩道は破線、等高線と建物は分類コードで描き分けている。',
     on: true,
     opacity: 1,
-    legend: [
-      { label: '一般', css: 'border-top:2px solid var(--ink)' },
-      { label: '歩道', css: 'border-top:2px dashed var(--ink)' },
-    ],
   },
   {
     key: 'symbol',
@@ -85,7 +72,6 @@ export const GROUPS: LayerGroup[] = [
     desc: 'DMの記号要素（E5）。公共測量標準図式の分類コード（4桁）をキーにスプライトのアイコンを表示する。',
     on: true,
     opacity: 1,
-    legend: [{ label: '地図記号', css: 'background:var(--accent);border-radius:50%' }],
   },
   {
     key: 'direction',
@@ -93,7 +79,6 @@ export const GROUPS: LayerGroup[] = [
     desc: 'DMの方向要素（E6）。坑口・鳥居・流水方向など、向きを持つ地図記号。角度属性に従って記号を回転させて表示する。',
     on: true,
     opacity: 1,
-    legend: [{ label: '方向つき記号', css: 'background:var(--accent);border-radius:2px' }],
   },
   {
     key: 'annotation',
@@ -101,7 +86,6 @@ export const GROUPS: LayerGroup[] = [
     desc: 'DMの注記要素（E7）。文字列を代表点に配置し、角度属性に従って回転させる。基準点等の注記は1段低いズームから表示する。',
     on: true,
     opacity: 1,
-    legend: [{ label: '文字注記', css: 'background:transparent;border:1px solid var(--ink-3)' }],
   },
 ]
 
@@ -153,11 +137,10 @@ const TEXT_ROTATE = [
 
 /**
  * 方向（E6）の回転角。
- * Angle は水平右（東）を0度とする反時計回り、MapLibre の icon-rotate は
- * 北を0度とする時計回りのため、90 - Angle で変換する。
- * スプライトのアイコンが上（北）向きに描かれていることを前提とする。
+ * Angle は水平右（東）を0度とする反時計回り。スプライトのアイコンは右（東）向きに
+ * 描かれており、MapLibre の icon-rotate は時計回りのため、符号を反転するだけでよい。
  */
-const ICON_ROTATE = ['-', 90, ['coalesce', ['to-number', ['get', 'Angle']], 0]]
+const ICON_ROTATE = ['*', -1, ['coalesce', ['to-number', ['get', 'Angle']], 0]]
 
 /**
  * 方向要素のうち、スプライトにアイコンが存在する分類コード。

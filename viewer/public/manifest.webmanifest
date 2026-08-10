@@ -1,7 +1,7 @@
 {
-  "name": "静岡市 都市計画基本図ビューワ",
+  "name": "都市計画基本図ビューワ",
   "short_name": "都市計画基本図",
-  "description": "静岡市の都市計画基本図（DMデータ）をベクトルタイルで表示するビューワ",
+  "description": "都市計画基本図（DMデータ）をベクトルタイルで表示するビューワ",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
