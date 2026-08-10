@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>静岡市 都市計画基本図</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="layer-control">
+      <div class="layer-control-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        Layers
+      </div>
+      <label class="layer-control-item">
+        <input type="checkbox" id="toggle-cs" />
+        <span class="layer-control-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4V7z"/><path d="M12 3v18"/><path d="M3 7l9 4 9-4"/></svg>
+        </span>
+        <span class="layer-control-label">CS立体図</span>
+        <div class="toggle-switch">
+          <div class="toggle-thumb"></div>
+        </div>
+      </label>
+      <label class="layer-control-item">
+        <input type="checkbox" id="toggle-kihonzu" checked />
+        <span class="layer-control-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>
+        </span>
+        <span class="layer-control-label">都市計画基本図</span>
+        <div class="toggle-switch">
+          <div class="toggle-thumb"></div>
+        </div>
+      </label>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
