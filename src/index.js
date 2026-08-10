@@ -1,16 +1,19 @@
 // -----------------------------------------
 // DM → GeoJSON 変換メインスクリプト
 // 使用方法:
-//   node index.js                                    # input/2500/ を読み込み output/ へ出力
-//   node index.js --scale 10000                      # input/10000/ を読み込み output/ へ出力
-//   node index.js --epsg 6676                        # 入力座標系を指定（デフォルト: 6676）
-//   node index.js --scale 2500 --input /path/to/dir  # 入力フォルダを直接指定
+//   node src/index.js                                    # input/2500/ を読み込み output/ へ出力
+//   node src/index.js --scale 10000                      # input/10000/ を読み込み output/ へ出力
+//   node src/index.js --epsg 6676                        # 入力座標系を指定（デフォルト: 6676）
+//   node src/index.js --scale 2500 --input /path/to/dir  # 入力フォルダを直接指定
 // -----------------------------------------
 const path = require('path');
 const fs = require('fs');
 const DMFiles = require('./dmfiles');
 const DM = require('./dm');
 const GeoJSONWriter = require('./geojsonWriter');
+
+// input/ と output/ はリポジトリルート直下（src/ の1つ上）
+const ROOT = path.join(__dirname, '..');
 
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -41,7 +44,7 @@ function parseArgs() {
 
   // --input 省略時は input/${scale}/ フォルダを使用
   if (!input) {
-    input = path.join(__dirname, 'input', String(scale));
+    input = path.join(ROOT, 'input', String(scale));
   } else {
     input = path.resolve(input);
   }
@@ -56,7 +59,7 @@ function parseArgs() {
 function main() {
   const { scale, dmDir, epsg } = parseArgs();
 
-  const outDir = path.join(__dirname, 'output');
+  const outDir = path.join(ROOT, 'output');
   fs.mkdirSync(outDir, { recursive: true });
 
   const outLine = path.join(outDir, `都市計画基本図_${scale}_線.geojson`);
