@@ -13,6 +13,11 @@ function fmt(n) {
   return parseFloat(n.toFixed(7)).toString();
 }
 
+// 書き込みバッファのしきい値。1フィーチャごとに writeSync を呼ぶと、出力先が
+// WSL の /mnt/c のような低速なファイルシステムのとき syscall のコストが支配的に
+// なる（実測で 100万フィーチャあたり約6分）。一定量ためてからまとめて書き出す。
+const FLUSH_SIZE = 4 * 1024 * 1024;
+
 class GeoJSONWriter {
   // epsgCode: 入力データの座標参照系（EPSG整数コード）
   constructor(outFile, epsgCode) {
@@ -29,10 +34,18 @@ class GeoJSONWriter {
     this.properties = null;
     this._started = false;
     this._closed = false;
+    this._buf = '';
   }
 
   _write(str) {
-    fs.writeSync(this._fd, str, null, 'utf8');
+    this._buf += str;
+    if (this._buf.length >= FLUSH_SIZE) this._flush();
+  }
+
+  _flush() {
+    if (this._buf.length === 0) return;
+    fs.writeSync(this._fd, this._buf, null, 'utf8');
+    this._buf = '';
   }
 
   close() {
@@ -42,6 +55,7 @@ class GeoJSONWriter {
     } else {
       this._write('\n]}');
     }
+    this._flush();
     fs.closeSync(this._fd);
     this._closed = true;
   }
