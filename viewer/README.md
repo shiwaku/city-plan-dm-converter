@@ -1,6 +1,6 @@
 # 都市計画基本図ビューワ
 
-都市計画基本図（DMデータ）をベクトルタイル化し、国土地理院の最適化ベクトルタイル（淡色地図風・標準地図風）を背景に表示するWebマップ。表示しているデータは静岡市の1/10,000・1/2,500です。
+都市計画基本図（DMデータ）をベクトルタイル化し、国土地理院の最適化ベクトルタイル（淡色地図風・標準地図風）・全国最新写真・白図（無地）から選べる背景の上に表示するWebマップ。表示しているデータは静岡市の1/10,000・1/2,500です。
 
 本ディレクトリは [dm-converter](../README.md) のサブディレクトリです。変換した GeoJSON をベクトルタイル化した結果を確認するためのビューワとして同梱しています。
 
@@ -35,6 +35,7 @@
 |--------|--------|-----------|
 | 都市計画基本図（1/10,000・1/2,500） | [静岡市オープンデータ](https://data.bodik.jp/dataset/221007_1712212695) | 測量法第44条に基づく使用承認（承認番号：07静都都第2068号）<br>**使用期間: 2027年1月19日まで** |
 | 最適化ベクトルタイル（淡色地図風・標準地図風） | [国土地理院](https://github.com/gsi-cyberjapan/optimal_bvmap) | — |
+| 地理院タイル（全国最新写真） | [国土地理院](https://maps.gsi.go.jp/development/ichiran.html) | — |
 
 ---
 
@@ -113,6 +114,7 @@ PMTilesファイルはレンタルサーバ（`shiworks2.xsrv.jp/shizuoka-city/`
 | kihonzu_10000_line_building | 線（建物: Code 3001〜3004） | 13 | 15 |
 | kihonzu_10000_line_other | 線（その他） | 2 | 15 |
 | kihonzu_10000_symbol | 記号 | 13 | 15 |
+| kihonzu_10000_direction | 方向（角度に従って記号を回転） | 13 | 15 |
 | kihonzu_10000_annotation | 注記（基準点等を除く） | 13 | 15 |
 | kihonzu_10000_annotation_kijunten | 注記（基準点等） | 12 | 15 |
 
@@ -143,10 +145,10 @@ PMTilesファイルはレンタルサーバ（`shiworks2.xsrv.jp/shizuoka-city/`
 
 ### 使用ツール
 
-| ツール | バージョン | 用途 |
+| ツール | 動作確認バージョン | 用途 |
 |--------|-----------|------|
 | [tippecanoe](https://github.com/felt/tippecanoe) | v2.80.0 | GeoJSON → MBTiles |
-| [go-pmtiles](https://github.com/protomaps/go-pmtiles) | v1.30.0 | MBTiles → PMTiles |
+| [go-pmtiles](https://github.com/protomaps/go-pmtiles) | v1.30.3 | MBTiles → PMTiles |
 
 ### 入力ファイル
 
@@ -154,10 +156,12 @@ PMTilesファイルはレンタルサーバ（`shiworks2.xsrv.jp/shizuoka-city/`
 都市計画基本図_10000_線.geojson      # 1/10,000 線データ
 都市計画基本図_10000_面.geojson      # 1/10,000 面データ
 都市計画基本図_10000_記号.geojson    # 1/10,000 記号データ
+都市計画基本図_10000_方向.geojson    # 1/10,000 方向データ
 都市計画基本図_10000_注記.geojson    # 1/10,000 注記データ
 都市計画基本図_2500_線.geojson       # 1/2,500 線データ
 都市計画基本図_2500_面.geojson       # 1/2,500 面データ
 都市計画基本図_2500_記号.geojson     # 1/2,500 記号データ
+都市計画基本図_2500_方向.geojson     # 1/2,500 方向データ
 都市計画基本図_2500_注記.geojson     # 1/2,500 注記データ
 ```
 
@@ -179,6 +183,7 @@ tippecanoe \
   -L kihonzu_10000_line:都市計画基本図_10000_線.geojson \
   -L kihonzu_10000_polygon:都市計画基本図_10000_面.geojson \
   -L kihonzu_10000_symbol:都市計画基本図_10000_記号.geojson \
+  -L kihonzu_10000_direction:都市計画基本図_10000_方向.geojson \
   -L kihonzu_10000_annotation:都市計画基本図_10000_注記.geojson
 ```
 
@@ -198,6 +203,7 @@ tippecanoe \
   -L kihonzu_2500_line:都市計画基本図_2500_線.geojson \
   -L kihonzu_2500_polygon:都市計画基本図_2500_面.geojson \
   -L kihonzu_2500_symbol:都市計画基本図_2500_記号.geojson \
+  -L kihonzu_2500_direction:都市計画基本図_2500_方向.geojson \
   -L kihonzu_2500_annotation:都市計画基本図_2500_注記.geojson
 ```
 
