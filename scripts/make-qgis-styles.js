@@ -10,6 +10,8 @@
 //   node scripts/make-qgis-styles.js                    # output/*.geojson から分類コードを収集
 //   node scripts/make-qgis-styles.js --codes 3509,4201  # 記号のコードを直接指定
 //   node scripts/make-qgis-styles.js --icon-size 12          # 地図記号の表示サイズ(mm)
+//   node scripts/make-qgis-styles.js --label-size 8         # 注記の文字サイズ(pt)
+//   node scripts/make-qgis-styles.js --label-min-scale 5000 # 注記を出す最大の縮尺分母
 //
 // 地図記号は qgis/symbols/dm-<コード>.svg（ビューワと同じ smartcity-dm-sprite の
 // アイコン）を QML に base64 で埋め込む。埋め込むことで、SVGパスの設定なしに
@@ -31,11 +33,22 @@ const QGIS_VERSION = '3.34.0-Prizren';
  * 中央値で3割ほどしかないため、指定値の見た目は3分の1程度になる。既定の 9mm で
  * 実際のインクは 3mm 前後。--icon-size で変更できる。
  */
-const ICON_SIZE = (() => {
-  const i = process.argv.indexOf('--icon-size');
+function numArg(name, fallback) {
+  const i = process.argv.indexOf(name);
   const v = i !== -1 && process.argv[i + 1] ? Number(process.argv[i + 1]) : NaN;
-  return Number.isFinite(v) && v > 0 ? String(v) : '9';
-})();
+  return Number.isFinite(v) && v > 0 ? String(v) : fallback;
+}
+
+const ICON_SIZE = numArg('--icon-size', '9');
+
+/** 注記の文字サイズ（pt）。 */
+const LABEL_SIZE = numArg('--label-size', '7');
+
+/**
+ * 注記を表示する最大の縮尺分母。既定の 2500 は「1/2,500 以上に拡大したときだけ
+ * 注記を出す」の意味。DMの注記は密度が高く、引いた状態では重なって読めないため。
+ */
+const LABEL_MIN_SCALE = numArg('--label-min-scale', '2500');
 
 // ---- 分類コード名称（ビューワと同じ対応表を使う） ----
 
@@ -402,7 +415,7 @@ ${simpleMarker('0', { shape: 'circle', color: '120,120,120,255', size: '0.8' })}
 
   const labeling = `  <labeling type="simple">
     <settings calloutType="simple">
-      <text-style fieldName="Text" isExpression="0" fontSize="9" fontSizeUnit="Point" textColor="0,0,0,255"
+      <text-style fieldName="Text" isExpression="0" fontSize="${LABEL_SIZE}" fontSizeUnit="Point" textColor="0,0,0,255"
                   textOrientation="horizontal" multilineHeight="1" allowHtml="0" blendMode="0" fontStrikeout="0"
                   fontUnderline="0" fontItalic="0" fontWeight="50" textOpacity="1">
         <text-buffer bufferDraw="1" bufferSize="0.8" bufferSizeUnits="MM" bufferColor="255,255,255,255"
@@ -414,9 +427,10 @@ ${simpleMarker('0', { shape: 'circle', color: '120,120,120,255', size: '0.8' })}
                    autoWrapLength="0" decimals="3" formatNumbers="0" plussign="0" addDirectionSymbol="0"/>
       <placement placement="1" offsetType="0" quadOffset="4" xOffset="0" yOffset="0" offsetUnits="MM"
                  rotationAngle="0" preserveRotation="1" dist="0" distUnits="MM" priority="5"
-                 overlapHandling="AllowOverlapIfRequired"/>
-      <rendering drawLabels="1" scaleVisibility="0" fontMinPixelSize="3" fontMaxPixelSize="10000"
-                 displayAll="1" upsidedownLabels="0" labelPerPart="0" mergeLines="0" obstacle="0"/>
+                 overlapHandling="PreventOverlap"/>
+      <rendering drawLabels="1" scaleVisibility="1" scaleMin="${LABEL_MIN_SCALE}" scaleMax="0"
+                 fontMinPixelSize="3" fontMaxPixelSize="10000" displayAll="0" upsidedownLabels="0"
+                 labelPerPart="0" mergeLines="0" obstacle="1" obstacleFactor="1"/>
 ${ddProperties({ LabelRotation: rotation, TextOrientation: orientation }, '      ')}
     </settings>
   </labeling>

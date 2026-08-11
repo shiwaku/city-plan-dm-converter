@@ -33,7 +33,7 @@
   </renderer-v2>
   <labeling type="simple">
     <settings calloutType="simple">
-      <text-style fieldName="Text" isExpression="0" fontSize="9" fontSizeUnit="Point" textColor="0,0,0,255"
+      <text-style fieldName="Text" isExpression="0" fontSize="7" fontSizeUnit="Point" textColor="0,0,0,255"
                   textOrientation="horizontal" multilineHeight="1" allowHtml="0" blendMode="0" fontStrikeout="0"
                   fontUnderline="0" fontItalic="0" fontWeight="50" textOpacity="1">
         <text-buffer bufferDraw="1" bufferSize="0.8" bufferSizeUnits="MM" bufferColor="255,255,255,255"
@@ -45,9 +45,10 @@
                    autoWrapLength="0" decimals="3" formatNumbers="0" plussign="0" addDirectionSymbol="0"/>
       <placement placement="1" offsetType="0" quadOffset="4" xOffset="0" yOffset="0" offsetUnits="MM"
                  rotationAngle="0" preserveRotation="1" dist="0" distUnits="MM" priority="5"
-                 overlapHandling="AllowOverlapIfRequired"/>
-      <rendering drawLabels="1" scaleVisibility="0" fontMinPixelSize="3" fontMaxPixelSize="10000"
-                 displayAll="1" upsidedownLabels="0" labelPerPart="0" mergeLines="0" obstacle="0"/>
+                 overlapHandling="PreventOverlap"/>
+      <rendering drawLabels="1" scaleVisibility="1" scaleMin="2500" scaleMax="0"
+                 fontMinPixelSize="3" fontMaxPixelSize="10000" displayAll="0" upsidedownLabels="0"
+                 labelPerPart="0" mergeLines="0" obstacle="1" obstacleFactor="1"/>
       <data_defined_properties>
         <Option type="Map">
           <Option name="name" type="QString" value=""/>
