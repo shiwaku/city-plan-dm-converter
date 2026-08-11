@@ -94,7 +94,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -114,7 +114,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -134,7 +134,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -154,7 +154,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -176,7 +176,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="2.4"/>
+          <Option name="size" type="QString" value="3"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -196,7 +196,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -216,7 +216,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -236,7 +236,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -256,7 +256,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -276,7 +276,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -296,7 +296,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -318,7 +318,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="2.4"/>
+          <Option name="size" type="QString" value="3"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -338,7 +338,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -358,7 +358,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -378,7 +378,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -398,7 +398,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -418,7 +418,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -438,7 +438,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -458,7 +458,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -478,7 +478,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -498,7 +498,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -518,7 +518,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -538,7 +538,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -558,7 +558,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -578,7 +578,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -598,7 +598,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -618,7 +618,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -638,7 +638,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -658,7 +658,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -678,7 +678,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -698,7 +698,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -718,7 +718,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -738,7 +738,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -758,7 +758,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -778,7 +778,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -798,7 +798,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -818,7 +818,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -838,7 +838,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -858,7 +858,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -880,7 +880,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="2.4"/>
+          <Option name="size" type="QString" value="3"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -900,7 +900,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -920,7 +920,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -940,7 +940,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -960,7 +960,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -980,7 +980,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1000,7 +1000,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1020,7 +1020,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1040,7 +1040,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1060,7 +1060,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1080,7 +1080,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1100,7 +1100,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1120,7 +1120,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1140,7 +1140,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1160,7 +1160,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1182,7 +1182,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="2.4"/>
+          <Option name="size" type="QString" value="3"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1202,7 +1202,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1222,7 +1222,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1242,7 +1242,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1262,7 +1262,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1282,7 +1282,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1302,7 +1302,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1322,7 +1322,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1342,7 +1342,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1362,7 +1362,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1382,7 +1382,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1402,7 +1402,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1422,7 +1422,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -1442,7 +1442,7 @@
           <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="4"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>

@@ -9,6 +9,7 @@
 // 使い方:
 //   node scripts/make-qgis-styles.js                    # output/*.geojson から分類コードを収集
 //   node scripts/make-qgis-styles.js --codes 3509,4201  # 記号のコードを直接指定
+//   node scripts/make-qgis-styles.js --icon-size 12          # 地図記号の表示サイズ(mm)
 //
 // 地図記号は qgis/symbols/dm-<コード>.svg（ビューワと同じ smartcity-dm-sprite の
 // アイコン）を QML に base64 で埋め込む。埋め込むことで、SVGパスの設定なしに
@@ -24,6 +25,17 @@ const ROOT = path.join(__dirname, '..');
 const OUT_DIR = path.join(ROOT, 'qgis');
 const ICON_DIR = path.join(OUT_DIR, 'symbols');
 const QGIS_VERSION = '3.34.0-Prizren';
+
+/**
+ * 地図記号の表示サイズ（mm）。SVGは 64x64 のキャンバスに対して絵の占有率が
+ * 中央値で3割ほどしかないため、指定値の見た目は3分の1程度になる。既定の 9mm で
+ * 実際のインクは 3mm 前後。--icon-size で変更できる。
+ */
+const ICON_SIZE = (() => {
+  const i = process.argv.indexOf('--icon-size');
+  const v = i !== -1 && process.argv[i + 1] ? Number(process.argv[i + 1]) : NaN;
+  return Number.isFinite(v) && v > 0 ? String(v) : '9';
+})();
 
 // ---- 分類コード名称（ビューワと同じ対応表を使う） ----
 
@@ -118,7 +130,7 @@ ${layer}
 }
 
 /** SVG マーカー。SVG は base64 で埋め込むため、外部ファイルへのパス解決が不要。 */
-function svgMarker(name, { base64, size = '4', dd = null }) {
+function svgMarker(name, { base64, size = ICON_SIZE, dd = null }) {
   const layer = `      <layer class="SvgMarker" enabled="1" locked="0" pass="0">
         <Option type="Map">
           <Option name="angle" type="QString" value="0"/>
@@ -279,10 +291,10 @@ function symbolStyle(codes, names) {
     const base64 = loadIcon(code);
     if (base64) {
       withIcon++;
-      return svgMarker(String(i), { base64, size: '4' });
+      return svgMarker(String(i), { base64 });
     }
     // スプライトに無いコードは色付きの丸で代替する（凡例で名称は分かる）
-    return simpleMarker(String(i), { shape: 'circle', color: categoryColor(i, codes.length), size: '2.4' });
+    return simpleMarker(String(i), { shape: 'circle', color: categoryColor(i, codes.length), size: '3' });
   };
   const fallback = (name) => simpleMarker(name, { shape: 'circle', color: '150,150,150,255', size: '2.0' });
 
@@ -308,7 +320,7 @@ function directionStyle(codes, names) {
     simpleMarker(name, {
       shape: 'triangle',
       color: '227,26,28,255',
-      size: '3.0',
+      size: '3.6',
       outlineWidth: '0.2',
       dd: ddProperties({ angle: TRIANGLE_ROTATION }),
     });
@@ -328,7 +340,7 @@ ${triangle('0')}
     const base64 = loadIcon(code);
     if (base64) {
       withIcon++;
-      return svgMarker(String(i), { base64, size: '4.5', dd: ddProperties({ angle: SVG_ROTATION }) });
+      return svgMarker(String(i), { base64, dd: ddProperties({ angle: SVG_ROTATION }) });
     }
     return triangle(String(i));
   };
