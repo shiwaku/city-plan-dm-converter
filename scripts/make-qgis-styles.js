@@ -164,6 +164,68 @@ ${dd ? dd + '\n' : ''}      </layer>`;
   return wrapSymbol(name, layer);
 }
 
+function simpleLine(name, { color = '0,0,0,255', width = '0.2', style = 'solid' }) {
+  const layer = `      <layer class="SimpleLine" enabled="1" locked="0" pass="0">
+        <Option type="Map">
+          <Option name="capstyle" type="QString" value="square"/>
+          <Option name="customdash" type="QString" value="5;2"/>
+          <Option name="customdash_unit" type="QString" value="MM"/>
+          <Option name="draw_inside_polygon" type="QString" value="0"/>
+          <Option name="joinstyle" type="QString" value="bevel"/>
+          <Option name="line_color" type="QString" value="${color}"/>
+          <Option name="line_style" type="QString" value="${style}"/>
+          <Option name="line_width" type="QString" value="${width}"/>
+          <Option name="line_width_unit" type="QString" value="MM"/>
+          <Option name="offset" type="QString" value="0"/>
+          <Option name="offset_unit" type="QString" value="MM"/>
+          <Option name="use_custom_dash" type="QString" value="0"/>
+        </Option>
+      </layer>`;
+  return `    <symbol name="${name}" type="line" alpha="1" clip_to_extent="1" force_rhr="0" frame_rate="10" is_animated="0">
+${layer}
+    </symbol>`;
+}
+
+function simpleFill(name, { color = '0,0,0,0', style = 'no', outline = '0,0,0,255', outlineWidth = '0.2' }) {
+  const layer = `      <layer class="SimpleFill" enabled="1" locked="0" pass="0">
+        <Option type="Map">
+          <Option name="border_width_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+          <Option name="color" type="QString" value="${color}"/>
+          <Option name="joinstyle" type="QString" value="bevel"/>
+          <Option name="offset" type="QString" value="0,0"/>
+          <Option name="offset_unit" type="QString" value="MM"/>
+          <Option name="outline_color" type="QString" value="${outline}"/>
+          <Option name="outline_style" type="QString" value="solid"/>
+          <Option name="outline_width" type="QString" value="${outlineWidth}"/>
+          <Option name="outline_width_unit" type="QString" value="MM"/>
+          <Option name="style" type="QString" value="${style}"/>
+        </Option>
+      </layer>`;
+  return `    <symbol name="${name}" type="fill" alpha="1" clip_to_extent="1" force_rhr="0" frame_rate="10" is_animated="0">
+${layer}
+    </symbol>`;
+}
+
+/** 分類コードの範囲で描き分けるためのルールベースレンダラ。 */
+function ruleRenderer(rules, makeSymbol) {
+  const key = (n) => `{00000000-0000-0000-0000-${String(n).padStart(12, '0')}}`;
+  const ruleXml = rules
+    .map(
+      (r, i) =>
+        `      <rule key="${key(i + 1)}" symbol="${i}" label="${esc(r.label)}" filter="${esc(r.filter)}"/>`,
+    )
+    .join('\n');
+  const symbols = rules.map((r, i) => makeSymbol(r, String(i))).join('\n');
+  return `  <renderer-v2 type="RuleRenderer" forceraster="0" symbollevels="0" enableorderby="0" referencescale="-1">
+    <rules key="${key(0)}">
+${ruleXml}
+    </rules>
+    <symbols>
+${symbols}
+    </symbols>
+  </renderer-v2>`;
+}
+
 function qml({ header, renderer, labeling = '' }) {
   return `<!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
 <!--
@@ -269,6 +331,38 @@ ${triangle('0')}
   return { style, withIcon };
 }
 
+// ---- 線（E2）: 分類コードで描き分け ----
+
+// ビューワと同じ描き分け。白図が既定のため色は黒に統一し、線種と太さで差をつける。
+const CONTOUR_CODES = ['7101', '7102', '7103', '7104'];
+const BUILDING_CODES = ['3001', '3002', '3003', '3004'];
+const SIDEWALK_CODE = '2213';
+
+const inList = (codes) => `"Code" IN (${codes.map((c) => `'${c}'`).join(',')})`;
+
+function lineStyle() {
+  const rules = [
+    { label: '歩道', filter: `"Code" = '${SIDEWALK_CODE}'`, width: '0.2', style: 'dash' },
+    { label: '等高線', filter: inList(CONTOUR_CODES), width: '0.15', style: 'solid' },
+    { label: '建物', filter: inList(BUILDING_CODES), width: '0.26', style: 'solid' },
+    { label: 'その他', filter: 'ELSE', width: '0.2', style: 'solid' },
+  ];
+  const renderer = ruleRenderer(rules, (r, name) => simpleLine(name, { width: r.width, style: r.style }));
+  return qml({ header: '都市計画基本図 線（E2）: 歩道・等高線・建物を分類コードで描き分け', renderer });
+}
+
+// ---- 面（E1）: 塗りなし＋輪郭 ----
+
+function polygonStyle() {
+  // 白図として線図と重ねる前提のため、塗らずに輪郭だけ描く。
+  const renderer = `  <renderer-v2 type="singleSymbol" forceraster="0" symbollevels="0" enableorderby="0" referencescale="-1">
+    <symbols>
+${simpleFill('0', {})}
+    </symbols>
+  </renderer-v2>`;
+  return qml({ header: '都市計画基本図 面（E1）: 塗りなし＋黒の輪郭', renderer });
+}
+
 // ---- 注記（E7）: Text をラベル表示 ----
 
 function annotationStyle() {
@@ -331,6 +425,8 @@ function main() {
 
   fs.mkdirSync(OUT_DIR, { recursive: true });
   const files = [
+    ['都市計画基本図_線.qml', lineStyle()],
+    ['都市計画基本図_面.qml', polygonStyle()],
     ['都市計画基本図_記号.qml', sym.style],
     ['都市計画基本図_方向.qml', dir.style],
     ['都市計画基本図_注記.qml', annotationStyle()],
