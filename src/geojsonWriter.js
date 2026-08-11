@@ -13,9 +13,17 @@ function fmt(n) {
   return parseFloat(n.toFixed(7)).toString();
 }
 
+// 書き込みバッファのしきい値。1フィーチャごとに writeSync を呼ぶと、出力先が
+// WSL の /mnt/c のような低速なファイルシステムのとき syscall のコストが支配的に
+// なる（実測で 100万フィーチャあたり約6分）。一定量ためてからまとめて書き出す。
+const FLUSH_SIZE = 4 * 1024 * 1024;
+
 class GeoJSONWriter {
   // epsgCode: 入力データの座標参照系（EPSG整数コード）
-  constructor(outFile, epsgCode) {
+  // opts.fragment: FeatureCollection の外枠を書かず、Feature の並びだけを出力する。
+  //   並列処理でワーカーごとの断片を作り、あとで連結するために使う。
+  constructor(outFile, epsgCode, opts = {}) {
+    this._fragment = opts.fragment === true;
     const def = EPSG_DEFS[epsgCode];
     if (!def) {
       const keys = Object.keys(EPSG_DEFS).join(', ');
@@ -29,19 +37,30 @@ class GeoJSONWriter {
     this.properties = null;
     this._started = false;
     this._closed = false;
+    this._buf = '';
   }
 
   _write(str) {
-    fs.writeSync(this._fd, str, null, 'utf8');
+    this._buf += str;
+    if (this._buf.length >= FLUSH_SIZE) this._flush();
+  }
+
+  _flush() {
+    if (this._buf.length === 0) return;
+    fs.writeSync(this._fd, this._buf, null, 'utf8');
+    this._buf = '';
   }
 
   close() {
     if (this._closed) return;
-    if (!this._started) {
-      this._write('{"type":"FeatureCollection","features":[]}');
-    } else {
-      this._write('\n]}');
+    if (!this._fragment) {
+      if (!this._started) {
+        this._write('{"type":"FeatureCollection","features":[]}');
+      } else {
+        this._write('\n]}');
+      }
     }
+    this._flush();
     fs.closeSync(this._fd);
     this._closed = true;
   }
@@ -97,7 +116,7 @@ class GeoJSONWriter {
   // ファイルへの書き込み（1 Feature）
   write() {
     if (!this._started) {
-      this._write('{"type":"FeatureCollection","features":[\n');
+      if (!this._fragment) this._write('{"type":"FeatureCollection","features":[\n');
       this._started = true;
     } else {
       this._write(',\n');
