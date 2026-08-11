@@ -3,14 +3,18 @@
 //
 // 記号（E5）・方向（E6）・注記（E7）は代表点のポイントとして出力されるため、
 // QGIS に素で読み込むと属性の無い点が並ぶだけになる。それぞれに合ったスタイル
-// （分類コードでの色分け、角度による回転、注記のラベル表示）を当てる .qml を
+// （分類コードごとの地図記号、角度による回転、注記のラベル表示）を当てる .qml を
 // qgis/ に書き出す。
 //
 // 使い方:
-//   node scripts/make-qgis-styles.js                    # output/*_記号.geojson から分類コードを収集
-//   node scripts/make-qgis-styles.js --codes 3509,4201  # コードを直接指定
+//   node scripts/make-qgis-styles.js                    # output/*.geojson から分類コードを収集
+//   node scripts/make-qgis-styles.js --codes 3509,4201  # 記号のコードを直接指定
 //
-// 記号のカテゴリは実データに出現する分類コードから作る。他自治体のデータで
+// 地図記号は qgis/symbols/dm-<コード>.svg（ビューワと同じ smartcity-dm-sprite の
+// アイコン）を QML に base64 で埋め込む。埋め込むことで、SVGパスの設定なしに
+// .qml 単体で記号が表示される。アイコンが無いコードは色付きの丸で代替する。
+//
+// カテゴリは実データに出現する分類コードから作る。他自治体のデータで
 // 作り直す場合は、そのデータを変換したうえで再実行する。
 // -----------------------------------------
 const fs = require('fs');
@@ -18,6 +22,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const OUT_DIR = path.join(ROOT, 'qgis');
+const ICON_DIR = path.join(OUT_DIR, 'symbols');
 const QGIS_VERSION = '3.34.0-Prizren';
 
 // ---- 分類コード名称（ビューワと同じ対応表を使う） ----
@@ -34,7 +39,14 @@ function loadCodeNames() {
   return names;
 }
 
-// ---- 記号のカテゴリに使う分類コードの収集 ----
+/** 分類コードに対応する地図記号を base64 で返す。無ければ null。 */
+function loadIcon(code) {
+  const file = path.join(ICON_DIR, `dm-${code}.svg`);
+  if (!fs.existsSync(file)) return null;
+  return fs.readFileSync(file).toString('base64');
+}
+
+// ---- カテゴリに使う分類コードの収集 ----
 
 function codesFromArgs() {
   const i = process.argv.indexOf('--codes');
@@ -42,19 +54,20 @@ function codesFromArgs() {
   return process.argv[i + 1].split(',').map((s) => s.trim()).filter(Boolean);
 }
 
-function codesFromOutput() {
+/** output/ の GeoJSON から分類コードを集める。suffix は '_記号.geojson' など。 */
+function codesFromOutput(suffix) {
   const dir = path.join(ROOT, 'output');
   if (!fs.existsSync(dir)) return [];
-  const files = fs.readdirSync(dir).filter((f) => f.endsWith('_記号.geojson'));
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith(suffix));
   const found = new Set();
   for (const f of files) {
     const text = fs.readFileSync(path.join(dir, f), 'utf8');
     for (const m of text.matchAll(/"Code":"(\d+)"/g)) found.add(m[1]);
   }
-  return [...found];
+  return [...found].sort();
 }
 
-// ---- 色 ----
+// ---- 色（アイコンが無いコードの代替マーカー用） ----
 
 /** カテゴリ数に応じて色相を等間隔に振り、明度・彩度を交互に変えて隣接色を見分けやすくする。 */
 function categoryColor(index, total) {
@@ -77,30 +90,58 @@ const esc = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /** 式で駆動するプロパティ（マーカー角度など）。 */
-function ddProperties(props) {
+function ddProperties(props, indent = '        ') {
   const entries = Object.entries(props)
     .map(
-      ([key, expr]) => `          <Option name="${key}" type="Map">
-            <Option name="active" type="bool" value="true"/>
-            <Option name="expression" type="QString" value="${esc(expr)}"/>
-            <Option name="type" type="int" value="3"/>
-          </Option>`,
+      ([key, expr]) => `${indent}    <Option name="${key}" type="Map">
+${indent}      <Option name="active" type="bool" value="true"/>
+${indent}      <Option name="expression" type="QString" value="${esc(expr)}"/>
+${indent}      <Option name="type" type="int" value="3"/>
+${indent}    </Option>`,
     )
     .join('\n');
-  return `      <data_defined_properties>
-        <Option type="Map">
-          <Option name="name" type="QString" value=""/>
-          <Option name="properties" type="Map">
+  return `${indent}<data_defined_properties>
+${indent}  <Option type="Map">
+${indent}    <Option name="name" type="QString" value=""/>
+${indent}    <Option name="properties" type="Map">
 ${entries}
-          </Option>
-          <Option name="type" type="QString" value="collection"/>
-        </Option>
-      </data_defined_properties>`;
+${indent}    </Option>
+${indent}    <Option name="type" type="QString" value="collection"/>
+${indent}  </Option>
+${indent}</data_defined_properties>`;
 }
 
-function markerSymbol(name, { shape, color, size, outline = '35,35,35,255', outlineWidth = '0', dd = null }) {
+function wrapSymbol(name, layer) {
   return `    <symbol name="${name}" type="marker" alpha="1" clip_to_extent="1" force_rhr="0" frame_rate="10" is_animated="0">
-      <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
+${layer}
+    </symbol>`;
+}
+
+/** SVG マーカー。SVG は base64 で埋め込むため、外部ファイルへのパス解決が不要。 */
+function svgMarker(name, { base64, size = '4', dd = null }) {
+  const layer = `      <layer class="SvgMarker" enabled="1" locked="0" pass="0">
+        <Option type="Map">
+          <Option name="angle" type="QString" value="0"/>
+          <Option name="color" type="QString" value="0,0,0,255"/>
+          <Option name="fixedAspectRatio" type="QString" value="0"/>
+          <Option name="horizontal_anchor_point" type="QString" value="1"/>
+          <Option name="name" type="QString" value="base64:${base64}"/>
+          <Option name="offset" type="QString" value="0,0"/>
+          <Option name="offset_unit" type="QString" value="MM"/>
+          <Option name="outline_color" type="QString" value="0,0,0,255"/>
+          <Option name="outline_width" type="QString" value="0"/>
+          <Option name="outline_width_unit" type="QString" value="MM"/>
+          <Option name="scale_method" type="QString" value="diameter"/>
+          <Option name="size" type="QString" value="${size}"/>
+          <Option name="size_unit" type="QString" value="MM"/>
+          <Option name="vertical_anchor_point" type="QString" value="1"/>
+        </Option>
+${dd ? dd + '\n' : ''}      </layer>`;
+  return wrapSymbol(name, layer);
+}
+
+function simpleMarker(name, { shape, color, size, outline = '35,35,35,255', outlineWidth = '0', dd = null }) {
+  const layer = `      <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
         <Option type="Map">
           <Option name="angle" type="QString" value="0"/>
           <Option name="cap_style" type="QString" value="square"/>
@@ -119,8 +160,8 @@ function markerSymbol(name, { shape, color, size, outline = '35,35,35,255', outl
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
-${dd ? dd + '\n' : ''}      </layer>
-    </symbol>`;
+${dd ? dd + '\n' : ''}      </layer>`;
+  return wrapSymbol(name, layer);
 }
 
 function qml({ header, renderer, labeling = '' }) {
@@ -136,51 +177,96 @@ ${labeling}</qgis>
 `;
 }
 
-// ---- 記号（E5）: 分類コードで色分け ----
-
-function symbolStyle(codes, names) {
-  const sorted = [...codes].sort();
-  const categories = sorted
+/** 分類コードでカテゴリ分けするレンダラ。makeSymbol(code, index) が symbol XML を返す。 */
+function categorizedRenderer(codes, names, makeSymbol, fallbackSymbol) {
+  const categories = codes
     .map((code, i) => {
       const label = names[code] ? `${code} ${names[code]}` : code;
       return `      <category render="true" value="${code}" symbol="${i}" label="${esc(label)}"/>`;
     })
     .join('\n');
-  const symbols = sorted
-    .map((code, i) => markerSymbol(String(i), { shape: 'circle', color: categoryColor(i, sorted.length), size: '2.4' }))
-    .join('\n');
-  const other = sorted.length;
+  const symbols = codes.map((code, i) => makeSymbol(code, i)).join('\n');
+  const other = codes.length;
 
-  const renderer = `  <renderer-v2 type="categorizedSymbol" attr="Code" forceraster="0" symbollevels="0" enableorderby="0" referencescale="-1">
+  return `  <renderer-v2 type="categorizedSymbol" attr="Code" forceraster="0" symbollevels="0" enableorderby="0" referencescale="-1">
     <categories>
 ${categories}
       <category render="true" value="" symbol="${other}" label="その他"/>
     </categories>
     <symbols>
 ${symbols}
-${markerSymbol(String(other), { shape: 'circle', color: '150,150,150,255', size: '2.0' })}
+${fallbackSymbol(String(other))}
     </symbols>
   </renderer-v2>`;
-
-  return qml({
-    header: `都市計画基本図 記号（E5）: 分類コード ${sorted.length} 種で色分け`,
-    renderer,
-  });
 }
 
-// ---- 方向（E6）: Angle で回転 ----
+// ---- 記号（E5）: 分類コードごとの地図記号 ----
 
-function directionStyle() {
-  // QGIS のマーカー回転は北を0度とする時計回り。Angle は東を0度とする反時計回りのため
-  // 90 から引いて読み替える。三角形は角度0で上（北）を向く。
-  const dd = ddProperties({ angle: '90 - to_real("Angle")' });
-  const renderer = `  <renderer-v2 type="singleSymbol" forceraster="0" symbollevels="0" enableorderby="0" referencescale="-1">
+function symbolStyle(codes, names) {
+  let withIcon = 0;
+  const make = (code, i) => {
+    const base64 = loadIcon(code);
+    if (base64) {
+      withIcon++;
+      return svgMarker(String(i), { base64, size: '4' });
+    }
+    // スプライトに無いコードは色付きの丸で代替する（凡例で名称は分かる）
+    return simpleMarker(String(i), { shape: 'circle', color: categoryColor(i, codes.length), size: '2.4' });
+  };
+  const fallback = (name) => simpleMarker(name, { shape: 'circle', color: '150,150,150,255', size: '2.0' });
+
+  const renderer = categorizedRenderer(codes, names, make, fallback);
+  const style = qml({
+    header: `都市計画基本図 記号（E5）: 分類コード ${codes.length} 種（うち ${withIcon} 種は地図記号）`,
+    renderer,
+  });
+  return { style, withIcon };
+}
+
+// ---- 方向（E6）: 分類コードごとの地図記号を Angle で回転 ----
+
+// スプライトのアイコンは右（東）向きに描かれている。QGIS のマーカー回転は時計回り、
+// Angle は東を0度とする反時計回りのため、符号を反転するだけでよい。
+const SVG_ROTATION = '0 - to_real("Angle")';
+// 代替の三角マーカーは角度0で上（北）を向くため、90 から引いて読み替える。
+const TRIANGLE_ROTATION = '90 - to_real("Angle")';
+
+function directionStyle(codes, names) {
+  const triangle = (name) =>
+    simpleMarker(name, {
+      shape: 'triangle',
+      color: '227,26,28,255',
+      size: '3.0',
+      outlineWidth: '0.2',
+      dd: ddProperties({ angle: TRIANGLE_ROTATION }),
+    });
+
+  if (codes.length === 0) {
+    // 方向の実データが無い場合は、分類コードが分からないため単一シンボルにする。
+    const renderer = `  <renderer-v2 type="singleSymbol" forceraster="0" symbollevels="0" enableorderby="0" referencescale="-1">
     <symbols>
-${markerSymbol('0', { shape: 'triangle', color: '227,26,28,255', size: '3.0', outlineWidth: '0.2', dd })}
+${triangle('0')}
     </symbols>
   </renderer-v2>`;
+    return { style: qml({ header: '都市計画基本図 方向（E6）: Angle 属性で記号を回転', renderer }), withIcon: 0 };
+  }
 
-  return qml({ header: '都市計画基本図 方向（E6）: Angle 属性で記号を回転', renderer });
+  let withIcon = 0;
+  const make = (code, i) => {
+    const base64 = loadIcon(code);
+    if (base64) {
+      withIcon++;
+      return svgMarker(String(i), { base64, size: '4.5', dd: ddProperties({ angle: SVG_ROTATION }) });
+    }
+    return triangle(String(i));
+  };
+
+  const renderer = categorizedRenderer(codes, names, make, triangle);
+  const style = qml({
+    header: `都市計画基本図 方向（E6）: 分類コード ${codes.length} 種を Angle 属性で回転（うち ${withIcon} 種は地図記号）`,
+    renderer,
+  });
+  return { style, withIcon };
 }
 
 // ---- 注記（E7）: Text をラベル表示 ----
@@ -188,7 +274,7 @@ ${markerSymbol('0', { shape: 'triangle', color: '227,26,28,255', size: '3.0', ou
 function annotationStyle() {
   const renderer = `  <renderer-v2 type="singleSymbol" forceraster="0" symbollevels="0" enableorderby="0" referencescale="-1">
     <symbols>
-${markerSymbol('0', { shape: 'circle', color: '120,120,120,255', size: '0.8' })}
+${simpleMarker('0', { shape: 'circle', color: '120,120,120,255', size: '0.8' })}
     </symbols>
   </renderer-v2>`;
 
@@ -214,7 +300,7 @@ ${markerSymbol('0', { shape: 'circle', color: '120,120,120,255', size: '0.8' })}
                  overlapHandling="AllowOverlapIfRequired"/>
       <rendering drawLabels="1" scaleVisibility="0" fontMinPixelSize="3" fontMaxPixelSize="10000"
                  displayAll="1" upsidedownLabels="0" labelPerPart="0" mergeLines="0" obstacle="0"/>
-${ddProperties({ LabelRotation: rotation, TextOrientation: orientation }).replace(/^ {6}/gm, '      ')}
+${ddProperties({ LabelRotation: rotation, TextOrientation: orientation }, '      ')}
     </settings>
   </labeling>
 `;
@@ -226,26 +312,44 @@ ${ddProperties({ LabelRotation: rotation, TextOrientation: orientation }).replac
 
 function main() {
   const names = loadCodeNames();
-  const codes = codesFromArgs() || codesFromOutput();
-  if (codes.length === 0) {
+  const symbolCodes = codesFromArgs() || codesFromOutput('_記号.geojson');
+  const directionCodes = codesFromOutput('_方向.geojson');
+
+  if (symbolCodes.length === 0) {
     console.error('記号の分類コードが集められませんでした。');
     console.error('output/*_記号.geojson を生成してから実行するか、--codes 3509,4201 のように指定してください。');
     process.exit(1);
   }
+  if (!fs.existsSync(ICON_DIR)) {
+    console.error(`地図記号が見つかりません: ${ICON_DIR}`);
+    console.error('smartcity-dm-sprite の icons/dm-*.svg を配置してください。');
+    process.exit(1);
+  }
+
+  const sym = symbolStyle(symbolCodes, names);
+  const dir = directionStyle(directionCodes, names);
 
   fs.mkdirSync(OUT_DIR, { recursive: true });
   const files = [
-    ['都市計画基本図_記号.qml', symbolStyle(codes, names)],
-    ['都市計画基本図_方向.qml', directionStyle()],
+    ['都市計画基本図_記号.qml', sym.style],
+    ['都市計画基本図_方向.qml', dir.style],
     ['都市計画基本図_注記.qml', annotationStyle()],
   ];
   for (const [name, content] of files) {
     fs.writeFileSync(path.join(OUT_DIR, name), content, 'utf8');
     console.log(`qgis/${name}`);
   }
-  const unknown = codes.filter((c) => !names[c]).sort();
-  console.log(`記号の分類コード: ${codes.length}種`);
-  if (unknown.length) console.log(`名称が付録7に無いコード: ${unknown.join(', ')}`);
+
+  const report = (label, codes, withIcon) => {
+    if (codes.length === 0) return;
+    const missing = codes.filter((c) => !loadIcon(c));
+    console.log(`${label}: ${codes.length}種（地図記号 ${withIcon}種）`);
+    if (missing.length) console.log(`  スプライトに記号が無いコード: ${missing.join(', ')}`);
+    const unnamed = codes.filter((c) => !names[c]);
+    if (unnamed.length) console.log(`  付録7に名称が無いコード: ${unnamed.join(', ')}`);
+  };
+  report('記号', symbolCodes, sym.withIcon);
+  report('方向', directionCodes, dir.withIcon);
 }
 
 main();
