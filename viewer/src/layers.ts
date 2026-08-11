@@ -2,7 +2,14 @@ import type { LayerSpecification, SourceSpecification } from 'maplibre-gl'
 import { DM_SPRITE_ID } from './basemap'
 import { codeName } from './dmCodes'
 
-const PMTILES_BASE = 'https://shiworks2.xsrv.jp/shizuoka-city'
+/**
+ * PMTiles の配信元。既定は本番の配信先。
+ * 焼き直したタイルをマージ前に確認したい場合は、`VITE_PMTILES_BASE` で
+ * ローカルの配信先に差し替える（`pmtiles serve` などで output/ を配信する）。
+ *   VITE_PMTILES_BASE=http://localhost:8080 npm run dev
+ */
+const PMTILES_BASE =
+  import.meta.env.VITE_PMTILES_BASE ?? 'https://shiworks2.xsrv.jp/shizuoka-city'
 
 /**
  * 測量成果の使用承認（07静都都第2068号）の条件(3)で明記を求められている文言。
