@@ -87,11 +87,9 @@ async function main() {
   fs.mkdirSync(outDir, { recursive: true });
 
   const files = [...new DMFiles(dmDir)];
-  if (files.length === 0) {
-    console.error(`.dm ファイルが見つかりません: ${dmDir}`);
-    process.exit(1);
-  }
 
+  // ファイルが1つも無い場合も、空の GeoJSON を出して正常終了する（従来どおり）。
+  // ここで異常終了すると scripts/build.sh が set -e で止まってしまう。
   const workers = Math.min(jobs, files.length);
   if (workers > 1) {
     console.log(`並列変換: ${workers} ワーカー / ${files.length} ファイル`);
