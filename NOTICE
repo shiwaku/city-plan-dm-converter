@@ -77,6 +77,9 @@ DMデータは測量法（昭和24年法律第188号）に基づく公共測量�
 
   smartcity-dm-sprite（地図記号スプライト）
   https://github.com/geolonia/smartcity-dm-sprite
+  Copyright (c) 2024 Geolonia, Inc. / MIT License
+  ※ qgis/symbols/ の SVG は本リポジトリの icons/ を複製したもの。
+     ライセンス全文は qgis/symbols/LICENSE を参照。
 
   国土地理院「作業規程の準則 付録7 公共測量標準図式」
   https://www.gsi.go.jp/common/000258741.pdf
