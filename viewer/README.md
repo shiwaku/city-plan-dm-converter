@@ -15,7 +15,7 @@
 | 機能 | 内容 |
 |---|---|
 | レイヤー切替 | コンバーターの出力区分（面・線・記号・方向・注記）を個別にON/OFF。全ON/全OFFボタンあり |
-| 地図記号 | 記号（E5）・方向（E6）は分類コードをキーに [smartcity-dm-sprite](https://github.com/geolonia/smartcity-dm-sprite) のアイコンで描画。方向は `Angle` 属性で回転 |
+| 地図記号 | 記号（E5）・方向（E6）は分類コードをキーに [dm-sprite](https://github.com/shiwaku/dm-sprite) のアイコンで描画。方向は `Angle` 属性で回転 |
 | 不透明度 | レイヤーごとにスライダーで調整 |
 | レイヤー説明 | 各レイヤーの `i` ボタンで説明を開閉 |
 | 縮尺表示 | 1/10,000 と 1/2,500 のどちらを見ているかをバッジ表示（ズーム15で自動切替） |
@@ -37,7 +37,7 @@
 | 都市計画基本図（1/10,000・1/2,500） | [静岡市オープンデータ](https://data.bodik.jp/dataset/221007_1712212695) | 測量法第44条に基づく使用承認（承認番号：07静都都第2068号）<br>**使用期間: 2027年1月19日まで** |
 | 最適化ベクトルタイル（淡色地図風・標準地図風） | [国土地理院](https://github.com/gsi-cyberjapan/optimal_bvmap) | — |
 | 地理院タイル（全国最新写真） | [国土地理院](https://maps.gsi.go.jp/development/ichiran.html) | — |
-| smartcity-dm-sprite（地図記号スプライト） | [Geolonia](https://github.com/geolonia/smartcity-dm-sprite) | — |
+| 地図記号スプライト | [geolonia/smartcity-dm-sprite](https://github.com/geolonia/smartcity-dm-sprite)（不足6件を追加した fork [shiwaku/dm-sprite](https://github.com/shiwaku/dm-sprite) を参照） | — |
 | 分類コードの名称対応表 | 国土地理院「[作業規程の準則 付録7 公共測量標準図式](https://www.gsi.go.jp/common/000258741.pdf)」 | — |
 
 ---
@@ -93,7 +93,7 @@ viewer/
     └── vite-env.d.ts       # ビルド時定数の型宣言
 ```
 
-地図記号のスプライトはリポジトリに同梱せず、[smartcity-dm-sprite](https://github.com/geolonia/smartcity-dm-sprite) の GitHub Pages から読み込みます。背景スタイルを切り替えても記号が出るよう、`basemap.ts` がスタイルを返す直前に毎回注入します（地理院スタイル側のスプライトを `default`、追加分を `dm:` 接頭辞で参照）。
+地図記号のスプライトはリポジトリに同梱せず、[dm-sprite](https://github.com/shiwaku/dm-sprite) の GitHub Pages から読み込みます。静岡市データで使う記号のうち6コードが本家に無いため、それらを追加した fork を参照しています。背景スタイルを切り替えても記号が出るよう、`basemap.ts` がスタイルを返す直前に毎回注入します（地理院スタイル側のスプライトを `default`、追加分を `dm:` 接頭辞で参照）。
 
 PMTilesファイルはレンタルサーバ（`shiworks2.xsrv.jp/shizuoka-city/`）にホスティングしています。GitHub Pages への同梱は、1/2,500 が116MBあり Git の100MBファイル制限を超えるため行っていません。
 
