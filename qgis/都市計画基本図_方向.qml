@@ -1,6 +1,6 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
 <!--
-  都市計画基本図 方向（E6）: 分類コード 12 種を Angle 属性で回転（うち 9 種は地図記号）
+  都市計画基本図 方向（E6）: 分類コード 12 種を Angle 属性で回転（うち 12 種は地図記号）
   dm-converter (https://github.com/shiwaku/dm-converter) が生成。
   scripts/make-qgis-styles.js で作り直せる。手で編集した内容は次回生成時に失われる。
   埋め込まれている地図記号は smartcity-dm-sprite (https://github.com/geolonia/smartcity-dm-sprite)
@@ -25,22 +25,20 @@
     </categories>
     <symbols>
     <symbol name="0" type="marker" alpha="1" clip_to_extent="1" force_rhr="0" frame_rate="10" is_animated="0">
-      <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
+      <layer class="SvgMarker" enabled="1" locked="0" pass="0">
         <Option type="Map">
           <Option name="angle" type="QString" value="0"/>
-          <Option name="cap_style" type="QString" value="square"/>
-          <Option name="color" type="QString" value="227,26,28,255"/>
+          <Option name="color" type="QString" value="0,0,0,255"/>
+          <Option name="fixedAspectRatio" type="QString" value="0"/>
           <Option name="horizontal_anchor_point" type="QString" value="1"/>
-          <Option name="joinstyle" type="QString" value="bevel"/>
-          <Option name="name" type="QString" value="triangle"/>
+          <Option name="name" type="QString" value="base64:PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTI0LjUyIDMzLjc1QzI2LjA3IDMxLjA3IDI4LjkyIDI5LjQzIDMyIDI5LjQzQzM1LjA4IDI5LjQzIDM3LjkzIDMxLjA3IDM5LjQ4IDMzLjc1TDM4LjUyIDM0LjNDMzcuMTggMzEuOTcgMzQuNjkgMzAuNTMgMzIgMzAuNTNDMjkuMzEgMzAuNTMgMjYuODIgMzEuOTcgMjUuNDggMzQuM1oiIGZpbGw9ImJsYWNrIi8+Cjwvc3ZnPgo="/>
           <Option name="offset" type="QString" value="0,0"/>
           <Option name="offset_unit" type="QString" value="MM"/>
-          <Option name="outline_color" type="QString" value="35,35,35,255"/>
-          <Option name="outline_style" type="QString" value="solid"/>
-          <Option name="outline_width" type="QString" value="0.2"/>
+          <Option name="outline_color" type="QString" value="0,0,0,255"/>
+          <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="3.6"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -50,7 +48,7 @@
             <Option name="properties" type="Map">
             <Option name="angle" type="Map">
               <Option name="active" type="bool" value="true"/>
-              <Option name="expression" type="QString" value="90 - to_real(&quot;Angle&quot;)"/>
+              <Option name="expression" type="QString" value="0 - to_real(&quot;Angle&quot;)"/>
               <Option name="type" type="int" value="3"/>
             </Option>
             </Option>
@@ -225,22 +223,20 @@
       </layer>
     </symbol>
     <symbol name="6" type="marker" alpha="1" clip_to_extent="1" force_rhr="0" frame_rate="10" is_animated="0">
-      <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
+      <layer class="SvgMarker" enabled="1" locked="0" pass="0">
         <Option type="Map">
           <Option name="angle" type="QString" value="0"/>
-          <Option name="cap_style" type="QString" value="square"/>
-          <Option name="color" type="QString" value="227,26,28,255"/>
+          <Option name="color" type="QString" value="0,0,0,255"/>
+          <Option name="fixedAspectRatio" type="QString" value="0"/>
           <Option name="horizontal_anchor_point" type="QString" value="1"/>
-          <Option name="joinstyle" type="QString" value="bevel"/>
-          <Option name="name" type="QString" value="triangle"/>
+          <Option name="name" type="QString" value="base64:PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzIDMxLjA1TDI5IDMxLjA1TDI5IDI5Ljk1TDIzIDI5Ljk1Wk0zNSAzMS4wNUw0MSAzMS4wNUw0MSAyOS45NUwzNSAyOS45NVpNMjMgMzQuMDVMNDEgMzQuMDVMNDEgMzIuOTVMMjMgMzIuOTVaIiBmaWxsPSJibGFjayIvPgo8L3N2Zz4K"/>
           <Option name="offset" type="QString" value="0,0"/>
           <Option name="offset_unit" type="QString" value="MM"/>
-          <Option name="outline_color" type="QString" value="35,35,35,255"/>
-          <Option name="outline_style" type="QString" value="solid"/>
-          <Option name="outline_width" type="QString" value="0.2"/>
+          <Option name="outline_color" type="QString" value="0,0,0,255"/>
+          <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="3.6"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -250,7 +246,7 @@
             <Option name="properties" type="Map">
             <Option name="angle" type="Map">
               <Option name="active" type="bool" value="true"/>
-              <Option name="expression" type="QString" value="90 - to_real(&quot;Angle&quot;)"/>
+              <Option name="expression" type="QString" value="0 - to_real(&quot;Angle&quot;)"/>
               <Option name="type" type="int" value="3"/>
             </Option>
             </Option>
@@ -359,22 +355,20 @@
       </layer>
     </symbol>
     <symbol name="10" type="marker" alpha="1" clip_to_extent="1" force_rhr="0" frame_rate="10" is_animated="0">
-      <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
+      <layer class="SvgMarker" enabled="1" locked="0" pass="0">
         <Option type="Map">
           <Option name="angle" type="QString" value="0"/>
-          <Option name="cap_style" type="QString" value="square"/>
-          <Option name="color" type="QString" value="227,26,28,255"/>
+          <Option name="color" type="QString" value="0,0,0,255"/>
+          <Option name="fixedAspectRatio" type="QString" value="0"/>
           <Option name="horizontal_anchor_point" type="QString" value="1"/>
-          <Option name="joinstyle" type="QString" value="bevel"/>
-          <Option name="name" type="QString" value="triangle"/>
+          <Option name="name" type="QString" value="base64:PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTM5LjU1IDI4LjVDMzkuNTUgMzIuNjcgMzYuMTcgMzYuMDUgMzIgMzYuMDVDMjcuODMgMzYuMDUgMjQuNDUgMzIuNjcgMjQuNDUgMjguNUwyNS41NSAyOC41QzI1LjU1IDMyLjA2IDI4LjQ0IDM0Ljk1IDMyIDM0Ljk1QzM1LjU2IDM0Ljk1IDM4LjQ1IDMyLjA2IDM4LjQ1IDI4LjVaTTI5LjY3IDI5LjA1TDM0LjMzIDI5LjA1TDM0LjMzIDI3Ljk1TDI5LjY3IDI3Ljk1WiIgZmlsbD0iYmxhY2siLz4KPC9zdmc+Cg=="/>
           <Option name="offset" type="QString" value="0,0"/>
           <Option name="offset_unit" type="QString" value="MM"/>
-          <Option name="outline_color" type="QString" value="35,35,35,255"/>
-          <Option name="outline_style" type="QString" value="solid"/>
-          <Option name="outline_width" type="QString" value="0.2"/>
+          <Option name="outline_color" type="QString" value="0,0,0,255"/>
+          <Option name="outline_width" type="QString" value="0"/>
           <Option name="outline_width_unit" type="QString" value="MM"/>
           <Option name="scale_method" type="QString" value="diameter"/>
-          <Option name="size" type="QString" value="3.6"/>
+          <Option name="size" type="QString" value="9"/>
           <Option name="size_unit" type="QString" value="MM"/>
           <Option name="vertical_anchor_point" type="QString" value="1"/>
         </Option>
@@ -384,7 +378,7 @@
             <Option name="properties" type="Map">
             <Option name="angle" type="Map">
               <Option name="active" type="bool" value="true"/>
-              <Option name="expression" type="QString" value="90 - to_real(&quot;Angle&quot;)"/>
+              <Option name="expression" type="QString" value="0 - to_real(&quot;Angle&quot;)"/>
               <Option name="type" type="int" value="3"/>
             </Option>
             </Option>
