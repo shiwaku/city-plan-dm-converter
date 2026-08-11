@@ -91,7 +91,9 @@ export type Basemap = 'pale' | 'std' | 'photo' | 'blank'
 // スプライトだけなので、記号を接頭辞なしで参照している地理院スタイル側を 'default' に据え、
 // 追加分は `<id>:<アイコン名>` で参照する。背景を切り替えても記号が出るよう、
 // スタイルを返す直前に必ず注入する。
-const DM_SPRITE_URL = 'https://geolonia.github.io/smartcity-dm-sprite/sprite'
+// 本家 geolonia/smartcity-dm-sprite には静岡市データで使う記号のうち6件
+// （2219/3519/3531/5227/6335/7212）が無いため、それらを追加した fork を参照している。
+const DM_SPRITE_URL = 'https://shiwaku.github.io/smartcity-dm-sprite/sprite'
 export const DM_SPRITE_ID = 'dm'
 
 interface SpriteEntry {
