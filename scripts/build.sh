@@ -73,6 +73,83 @@ zoom_range() {
   esac
 }
 
+# タイルに残す属性。ビューワの描画に必要なものだけに絞る。
+#   Code  … 全レイヤーの描き分け（フィルタ・アイコン名）
+#   Text  … 注記の文字列
+#   Angle … 記号・注記の回転角
+# Elno（要素識別番号）はフィーチャごとにユニークな文字列で、タイル内の文字列辞書を
+# 最も膨らませる。RecordType / DataType / DataKind はレイヤー内で単一値、
+# Vnflag（縦横フラグ）は現状のビューワが未使用。いずれもポップアップ表示専用のため落とす。
+# 1/10,000 で実測すると、全属性を保持したタイルは総容量が約1.7倍、最大タイルが約1.8倍になる。
+TILE_ATTRS=(Code Text Angle)
+
+# ---- 低ズームで描かれないフィーチャの除外 ----
+#
+# ビューワは低ズームではレイヤーの一部しか描かない（viewer/src/layers.ts の minzoom）。
+# タイルに入れたままだと、描かれないのに転送とデコードのコストだけがかかる。
+# ここで指定した閾値は viewer 側の minzoom と対になっているため、片方を変えたら両方直す。
+# 対応表は viewer/README.md「1/10,000 レイヤー一覧」を参照。
+#
+# $zoom は整数のタイルズームに対する判定。MapLibre はベクタータイルで
+# tileZoom = floor(zoom) を使うため、閾値13なら現れる境界はマップズーム 13.0
+# （12.99 以下は非表示）になり、viewer の minzoom: 13 と一致する。
+
+# 建物（普通建物・堅ろう建物・無壁舎）。低ズームでは都市の骨格だけ見えればよい。
+# 面レイヤはフィーチャの9割が建物。
+BUILDING_CODES=(3001 3002 3003 3004)
+BUILDING_MIN_ZOOM=13
+
+# 等高線（計曲線・主曲線・補助曲線）。線レイヤのフィーチャの約17%。
+CONTOUR_CODES=(7101 7102 7103 7104)
+CONTOUR_MIN_ZOOM=12
+
+# 記号（E5）・方向（E6）はレイヤーごと ZL13 未満で不要。
+SYMBOL_MIN_ZOOM=13
+DIRECTION_MIN_ZOOM=13
+
+# 注記（E7）は ZL13 から。ただし基準点・標高点等は等高線と同じ ZL12 から出す。
+ANNOTATION_MIN_ZOOM=13
+KIJUNTEN_CODES=(3001 3003 6101 7301 7302 7303 7304 7305 7306 7307 7308 7309 7311 7312)
+KIJUNTEN_MIN_ZOOM=12
+
+# 分類コードの並びを JSON の文字列リスト（先頭にカンマ付き）にする。
+json_codes() {
+  local out="" code
+  for code in "$@"; do out="$out, \"$code\""; done
+  printf '%s' "$out"
+}
+
+# 指定コードだけを閾値未満のズームで落とす条件。
+drop_codes_below() {
+  local zoom="$1"; shift
+  printf '["any", [">=", "$zoom", %s], ["!in", "Code"%s]]' "$zoom" "$(json_codes "$@")"
+}
+
+# レイヤーごと閾値未満のズームで落とす条件。
+keep_from_zoom() {
+  printf '[">=", "$zoom", %s]' "$1"
+}
+
+# 注記は基準点等だけ1段低いズームから出す。
+annotation_filter() {
+  printf '["any", [">=", "$zoom", %s], ["all", [">=", "$zoom", %s], ["in", "Code"%s]]]' \
+    "$ANNOTATION_MIN_ZOOM" "$KIJUNTEN_MIN_ZOOM" "$(json_codes "${KIJUNTEN_CODES[@]}")"
+}
+
+# tippecanoe の --feature-filter 式（レイヤー名 → 残す条件）を組み立てる。
+tile_filter() {
+  local scale="$1" building contour
+  building="$(drop_codes_below "$BUILDING_MIN_ZOOM" "${BUILDING_CODES[@]}")"
+  contour="$(drop_codes_below "$CONTOUR_MIN_ZOOM" "${CONTOUR_CODES[@]}")"
+  printf '{'
+  printf '"kihonzu_%s_polygon": %s, ' "$scale" "$building"
+  printf '"kihonzu_%s_line": ["all", %s, %s], ' "$scale" "$building" "$contour"
+  printf '"kihonzu_%s_symbol": %s, ' "$scale" "$(keep_from_zoom "$SYMBOL_MIN_ZOOM")"
+  printf '"kihonzu_%s_direction": %s, ' "$scale" "$(keep_from_zoom "$DIRECTION_MIN_ZOOM")"
+  printf '"kihonzu_%s_annotation": %s' "$scale" "$(annotation_filter)"
+  printf '}'
+}
+
 log() { printf '\n\033[1m==> %s\033[0m\n' "$*"; }
 
 for SCALE in "${SCALES[@]}"; do
@@ -143,6 +220,9 @@ for SCALE in "${SCALES[@]}"; do
   for kv in "${KINDS[@]}"; do
     LAYER_ARGS+=(-L "kihonzu_${SCALE}_${kv##*:}:$OUT/都市計画基本図_${SCALE}_${kv%%:*}.geojson")
   done
+  # -y は「この属性だけ残す」の意味。
+  ATTR_ARGS=()
+  for attr in "${TILE_ATTRS[@]}"; do ATTR_ARGS+=(-y "$attr"); done
 
   tippecanoe \
     -o "$OUT/kihonzu_${SCALE}.mbtiles" \
@@ -151,6 +231,8 @@ for SCALE in "${SCALES[@]}"; do
     --no-feature-limit \
     --no-tile-size-limit \
     --force \
+    "${ATTR_ARGS[@]}" \
+    -j "$(tile_filter "$SCALE")" \
     "${LAYER_ARGS[@]}"
 
   pmtiles convert "$OUT/kihonzu_${SCALE}.mbtiles" "$OUT/kihonzu_${SCALE}.pmtiles"
