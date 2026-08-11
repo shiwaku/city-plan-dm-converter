@@ -226,12 +226,21 @@ ${symbols}
   </renderer-v2>`;
 }
 
-function qml({ header, renderer, labeling = '' }) {
+/**
+ * MIT ライセンスは複製物に著作権表示と許諾表示を含めることを求めている。
+ * .qml だけを他所へ持ち出しても表示が残るよう、記号を埋め込むファイルには
+ * ヘッダコメントに帰属表示を入れる。
+ */
+const SPRITE_NOTICE = `
+  埋め込まれている地図記号は smartcity-dm-sprite (https://github.com/geolonia/smartcity-dm-sprite)
+  Copyright (c) 2024 Geolonia, Inc. / MIT License`;
+
+function qml({ header, renderer, labeling = '', sprite = false }) {
   return `<!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
 <!--
   ${header}
   dm-converter (https://github.com/shiwaku/dm-converter) が生成。
-  scripts/make-qgis-styles.js で作り直せる。手で編集した内容は次回生成時に失われる。
+  scripts/make-qgis-styles.js で作り直せる。手で編集した内容は次回生成時に失われる。${sprite ? SPRITE_NOTICE : ''}
 -->
 <qgis version="${QGIS_VERSION}" styleCategories="Symbology|Labeling" labelsEnabled="${labeling ? 1 : 0}">
 ${renderer}
@@ -281,6 +290,7 @@ function symbolStyle(codes, names) {
   const style = qml({
     header: `都市計画基本図 記号（E5）: 分類コード ${codes.length} 種（うち ${withIcon} 種は地図記号）`,
     renderer,
+    sprite: withIcon > 0,
   });
   return { style, withIcon };
 }
@@ -327,6 +337,7 @@ ${triangle('0')}
   const style = qml({
     header: `都市計画基本図 方向（E6）: 分類コード ${codes.length} 種を Angle 属性で回転（うち ${withIcon} 種は地図記号）`,
     renderer,
+    sprite: withIcon > 0,
   });
   return { style, withIcon };
 }

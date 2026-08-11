@@ -3,6 +3,8 @@
   都市計画基本図 方向（E6）: 分類コード 12 種を Angle 属性で回転（うち 9 種は地図記号）
   dm-converter (https://github.com/shiwaku/dm-converter) が生成。
   scripts/make-qgis-styles.js で作り直せる。手で編集した内容は次回生成時に失われる。
+  埋め込まれている地図記号は smartcity-dm-sprite (https://github.com/geolonia/smartcity-dm-sprite)
+  Copyright (c) 2024 Geolonia, Inc. / MIT License
 -->
 <qgis version="3.34.0-Prizren" styleCategories="Symbology|Labeling" labelsEnabled="0">
   <renderer-v2 type="categorizedSymbol" attr="Code" forceraster="0" symbollevels="0" enableorderby="0" referencescale="-1">
