@@ -275,11 +275,11 @@ bash scripts/build.sh 2500 10000 25000
 
 いずれも無ければ該当する段だけスキップされ、変換自体は完了します。
 
-| ツール | 用途 |
-|---|---|
-| [OSGeo4W](https://trac.osgeo.org/osgeo4w/) の ogr2ogr | GeoParquet 生成 |
-| [tippecanoe](https://github.com/felt/tippecanoe) | ベクトルタイル生成 |
-| [go-pmtiles](https://github.com/protomaps/go-pmtiles) | PMTiles 変換 |
+| ツール | 動作確認バージョン | 用途 |
+|---|---|---|
+| [OSGeo4W](https://trac.osgeo.org/osgeo4w/) の ogr2ogr | GDAL 3.9.3 | GeoParquet 生成 |
+| [tippecanoe](https://github.com/felt/tippecanoe) | v2.80.0 | ベクトルタイル生成 |
+| [go-pmtiles](https://github.com/protomaps/go-pmtiles) | v1.30.3 | PMTiles 変換 |
 
 > **GeoParquet には Parquet ドライバを持つ GDAL が必要です。** conda 版・Debian 版の GDAL は既定で Parquet ドライバを含みません。スクリプトは `PATH` 上の `ogr2ogr` を調べ、Parquet 非対応であれば WSL 環境の `C:\OSGeo4W\bin\ogr2ogr.exe`（見つからなければ `C:\OSGeo4W64\bin\ogr2ogr.exe`）へ自動でフォールバックします（Windows形式のパスへの変換も行います）。
 

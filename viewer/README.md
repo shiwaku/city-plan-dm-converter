@@ -15,6 +15,7 @@
 | 機能 | 内容 |
 |---|---|
 | レイヤー切替 | コンバーターの出力区分（面・線・記号・方向・注記）を個別にON/OFF。全ON/全OFFボタンあり |
+| 地図記号 | 記号（E5）・方向（E6）は分類コードをキーに [smartcity-dm-sprite](https://github.com/geolonia/smartcity-dm-sprite) のアイコンで描画。方向は `Angle` 属性で回転 |
 | 不透明度 | レイヤーごとにスライダーで調整 |
 | レイヤー説明 | 各レイヤーの `i` ボタンで説明を開閉 |
 | 縮尺表示 | 1/10,000 と 1/2,500 のどちらを見ているかをバッジ表示（ズーム15で自動切替） |
@@ -36,6 +37,8 @@
 | 都市計画基本図（1/10,000・1/2,500） | [静岡市オープンデータ](https://data.bodik.jp/dataset/221007_1712212695) | 測量法第44条に基づく使用承認（承認番号：07静都都第2068号）<br>**使用期間: 2027年1月19日まで** |
 | 最適化ベクトルタイル（淡色地図風・標準地図風） | [国土地理院](https://github.com/gsi-cyberjapan/optimal_bvmap) | — |
 | 地理院タイル（全国最新写真） | [国土地理院](https://maps.gsi.go.jp/development/ichiran.html) | — |
+| smartcity-dm-sprite（地図記号スプライト） | [Geolonia](https://github.com/geolonia/smartcity-dm-sprite) | — |
+| 分類コードの名称対応表 | 国土地理院「[作業規程の準則 付録7 公共測量標準図式](https://www.gsi.go.jp/common/000258741.pdf)」 | — |
 
 ---
 
@@ -90,6 +93,8 @@ viewer/
     └── vite-env.d.ts       # ビルド時定数の型宣言
 ```
 
+地図記号のスプライトはリポジトリに同梱せず、[smartcity-dm-sprite](https://github.com/geolonia/smartcity-dm-sprite) の GitHub Pages から読み込みます。背景スタイルを切り替えても記号が出るよう、`basemap.ts` がスタイルを返す直前に毎回注入します（地理院スタイル側のスプライトを `default`、追加分を `dm:` 接頭辞で参照）。
+
 PMTilesファイルはレンタルサーバ（`shiworks2.xsrv.jp/shizuoka-city/`）にホスティングしています。GitHub Pages への同梱は、1/2,500 が116MBあり Git の100MBファイル制限を超えるため行っていません。
 
 ---
@@ -141,77 +146,29 @@ PMTilesファイルはレンタルサーバ（`shiworks2.xsrv.jp/shizuoka-city/`
 
 ---
 
-## PMTiles 生成フロー
+## ベクトルタイル
 
-### 使用ツール
+表示している PMTiles は、リポジトリルートの `scripts/build.sh` で生成しています。生成手順・tippecanoe のオプション・最大ズームレベルの決め方は [ルート README のベクトルタイル作成](../README.md#ベクトルタイル作成参考) を参照してください（ここに手順を写すと二重管理になるため置いていません）。
 
-| ツール | 動作確認バージョン | 用途 |
-|--------|-----------|------|
-| [tippecanoe](https://github.com/felt/tippecanoe) | v2.80.0 | GeoJSON → MBTiles |
-| [go-pmtiles](https://github.com/protomaps/go-pmtiles) | v1.30.3 | MBTiles → PMTiles |
+ビューワが前提としているのは次の2点です。ここを変えるとビューワ側の修正が必要になります。
 
-### 入力ファイル
+### タイルのレイヤー名
 
-```
-都市計画基本図_10000_線.geojson      # 1/10,000 線データ
-都市計画基本図_10000_面.geojson      # 1/10,000 面データ
-都市計画基本図_10000_記号.geojson    # 1/10,000 記号データ
-都市計画基本図_10000_方向.geojson    # 1/10,000 方向データ
-都市計画基本図_10000_注記.geojson    # 1/10,000 注記データ
-都市計画基本図_2500_線.geojson       # 1/2,500 線データ
-都市計画基本図_2500_面.geojson       # 1/2,500 面データ
-都市計画基本図_2500_記号.geojson     # 1/2,500 記号データ
-都市計画基本図_2500_方向.geojson     # 1/2,500 方向データ
-都市計画基本図_2500_注記.geojson     # 1/2,500 注記データ
-```
+`kihonzu_<縮尺>_<種別>` の形式です。`src/layers.ts` の `source-layer` がこの名前を直接指しているため、変えるとそのレイヤーは表示されなくなります。
 
-### ビルドコマンド
+| 変換結果の GeoJSON | タイルのレイヤー名 |
+|---|---|
+| `都市計画基本図_<縮尺>_線.geojson` | `kihonzu_<縮尺>_line` |
+| `都市計画基本図_<縮尺>_面.geojson` | `kihonzu_<縮尺>_polygon` |
+| `都市計画基本図_<縮尺>_記号.geojson` | `kihonzu_<縮尺>_symbol` |
+| `都市計画基本図_<縮尺>_方向.geojson` | `kihonzu_<縮尺>_direction` |
+| `都市計画基本図_<縮尺>_注記.geojson` | `kihonzu_<縮尺>_annotation` |
 
-#### 1. 1/10,000 MBTiles 生成
+### ズーム範囲
 
-- ズーム範囲: z2〜z14（表示は z2〜z14.99）
-- すべての地物を保持（間引きなし）
+縮尺ごとに別々の PMTiles を作り、表示側で切り替えます（結合しません）。
 
-```bash
-tippecanoe \
-  -o kihonzu_10000.mbtiles \
-  -Z2 -z14 \
-  -r1 \
-  --no-feature-limit \
-  --no-tile-size-limit \
-  --force \
-  -L kihonzu_10000_line:都市計画基本図_10000_線.geojson \
-  -L kihonzu_10000_polygon:都市計画基本図_10000_面.geojson \
-  -L kihonzu_10000_symbol:都市計画基本図_10000_記号.geojson \
-  -L kihonzu_10000_direction:都市計画基本図_10000_方向.geojson \
-  -L kihonzu_10000_annotation:都市計画基本図_10000_注記.geojson
-```
-
-#### 2. 1/2,500 MBTiles 生成
-
-- ズーム範囲: z15〜z16（表示は z15〜）
-- すべての地物を保持（間引きなし）
-
-```bash
-tippecanoe \
-  -o kihonzu_2500.mbtiles \
-  -Z15 -z16 \
-  -r1 \
-  --no-feature-limit \
-  --no-tile-size-limit \
-  --force \
-  -L kihonzu_2500_line:都市計画基本図_2500_線.geojson \
-  -L kihonzu_2500_polygon:都市計画基本図_2500_面.geojson \
-  -L kihonzu_2500_symbol:都市計画基本図_2500_記号.geojson \
-  -L kihonzu_2500_direction:都市計画基本図_2500_方向.geojson \
-  -L kihonzu_2500_annotation:都市計画基本図_2500_注記.geojson
-```
-
-#### 3. PMTiles 変換
-
-2つを個別に変換する（結合しない）。
-
-```bash
-pmtiles convert kihonzu_10000.mbtiles kihonzu_10000.pmtiles
-pmtiles convert kihonzu_2500.mbtiles  kihonzu_2500.pmtiles
-```
+| 縮尺 | tippecanoe のズーム範囲 | ビューワでの表示範囲 |
+|---|---|---|
+| 1/10,000 | `-Z2 -z14` | z2〜z14.99 |
+| 1/2,500 | `-Z15 -z16` | z15〜 |
