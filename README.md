@@ -702,7 +702,7 @@ npm run dev      # http://localhost:5174/
 
 レイヤー構成やスタイル定義は [viewer/README.md](viewer/README.md) を参照してください。
 
-基本図のスタイルは MapLibre スタイルの静的JSONとしても書き出しており、外部ツールから参照できます（`pmtiles://` を解せるツールが必要）。
+基本図のスタイルは静的な MapLibre スタイルの JSON として持っており、ビューワもこれを読んで描画します。外部ツールからも参照できます（`pmtiles://` を解せるツールが必要）。
 
 - https://shiwaku.github.io/dm-converter/style/kihonzu-light.json
 - https://shiwaku.github.io/dm-converter/style/kihonzu-dark.json

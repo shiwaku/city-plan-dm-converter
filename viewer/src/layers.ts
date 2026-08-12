@@ -142,6 +142,31 @@ export interface LayerEntry {
 }
 
 /**
+ * 書き出したスタイルの layer.metadata に載せるキー。
+ * グループ分けと不透明度の基準値は MapLibre スタイル仕様に無い情報だが、
+ * ビューワのパネルが必要とするため metadata で持ち回す。
+ */
+export const GROUP_META = 'dm-converter:group'
+export const OPACITY_META = 'dm-converter:opacity'
+
+/** 書き出したスタイルのレイヤー配列から、ビューワが使う LayerEntry を組み立てる。 */
+export function layerEntriesFromStyle(layers: LayerSpecification[]): LayerEntry[] {
+  const entries: LayerEntry[] = []
+  for (const spec of layers) {
+    const meta = (spec as { metadata?: Record<string, unknown> }).metadata
+    const group = meta?.[GROUP_META] as GroupKey | undefined
+    // background など、グループに属さないレイヤーはパネルの対象外。
+    if (!group) continue
+    entries.push({
+      group,
+      spec,
+      opacity: (meta?.[OPACITY_META] as Record<string, number>) ?? {},
+    })
+  }
+  return entries
+}
+
+/**
  * 注記に使うフォントスタック。地理院の最適化ベクトルタイルのグリフには
  * NotoSansJP-Regular しか無いため、明示しないと MapLibre 既定の
  * "Open Sans Regular, Arial Unicode MS Regular" を要求して404になり、文字が描画されない。
@@ -674,6 +699,9 @@ export function buildStyle(theme: 'light' | 'dark' = 'light'): StyleSpecificatio
       const paint = (entry.spec as { paint?: Record<string, unknown> }).paint
       return {
         ...entry.spec,
+        // ビューワはこの JSON からレイヤーを読む。パネルのグループ分けと不透明度
+        // スライダーの基準値はスタイル仕様に無い情報なので metadata に載せる。
+        metadata: { [GROUP_META]: entry.group, [OPACITY_META]: entry.opacity },
         paint: { ...paint, ...inkPaint(entry.spec.type, entry.group, ink) },
       } as LayerSpecification
     }),

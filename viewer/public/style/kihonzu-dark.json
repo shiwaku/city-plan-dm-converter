@@ -43,6 +43,12 @@
       "paint": {
         "fill-color": "#ffffff",
         "fill-opacity": 0.3
+      },
+      "metadata": {
+        "dm-converter:group": "polygon",
+        "dm-converter:opacity": {
+          "fill-opacity": 0.3
+        }
       }
     },
     {
@@ -1030,6 +1036,12 @@
             ]
           ]
         ]
+      },
+      "metadata": {
+        "dm-converter:group": "polygon",
+        "dm-converter:opacity": {
+          "line-opacity": 1
+        }
       }
     },
     {
@@ -2051,6 +2063,12 @@
             ]
           ]
         ]
+      },
+      "metadata": {
+        "dm-converter:group": "line",
+        "dm-converter:opacity": {
+          "line-opacity": 1
+        }
       }
     },
     {
@@ -3245,6 +3263,12 @@
             ]
           ]
         ]
+      },
+      "metadata": {
+        "dm-converter:group": "line",
+        "dm-converter:opacity": {
+          "line-opacity": 1
+        }
       }
     },
     {
@@ -3326,6 +3350,12 @@
       },
       "paint": {
         "icon-opacity": 1
+      },
+      "metadata": {
+        "dm-converter:group": "symbol",
+        "dm-converter:opacity": {
+          "icon-opacity": 1
+        }
       }
     },
     {
@@ -3423,6 +3453,12 @@
       },
       "paint": {
         "icon-opacity": 1
+      },
+      "metadata": {
+        "dm-converter:group": "direction",
+        "dm-converter:opacity": {
+          "icon-opacity": 1
+        }
       }
     },
     {
@@ -3511,6 +3547,12 @@
         "text-halo-color": "#14161a",
         "text-halo-width": 1.5,
         "text-opacity": 1
+      },
+      "metadata": {
+        "dm-converter:group": "annotation",
+        "dm-converter:opacity": {
+          "text-opacity": 1
+        }
       }
     },
     {
@@ -3522,6 +3564,12 @@
       "paint": {
         "fill-color": "#ffffff",
         "fill-opacity": 0.25
+      },
+      "metadata": {
+        "dm-converter:group": "polygon",
+        "dm-converter:opacity": {
+          "fill-opacity": 0.25
+        }
       }
     },
     {
@@ -4232,6 +4280,12 @@
             ]
           ]
         ]
+      },
+      "metadata": {
+        "dm-converter:group": "polygon",
+        "dm-converter:opacity": {
+          "line-opacity": 1
+        }
       }
     },
     {
@@ -4976,6 +5030,12 @@
             ]
           ]
         ]
+      },
+      "metadata": {
+        "dm-converter:group": "line",
+        "dm-converter:opacity": {
+          "line-opacity": 1
+        }
       }
     },
     {
@@ -5893,6 +5953,12 @@
             ]
           ]
         ]
+      },
+      "metadata": {
+        "dm-converter:group": "line",
+        "dm-converter:opacity": {
+          "line-opacity": 1
+        }
       }
     },
     {
@@ -5973,6 +6039,12 @@
       },
       "paint": {
         "icon-opacity": 1
+      },
+      "metadata": {
+        "dm-converter:group": "symbol",
+        "dm-converter:opacity": {
+          "icon-opacity": 1
+        }
       }
     },
     {
@@ -6069,6 +6141,12 @@
       },
       "paint": {
         "icon-opacity": 1
+      },
+      "metadata": {
+        "dm-converter:group": "direction",
+        "dm-converter:opacity": {
+          "icon-opacity": 1
+        }
       }
     },
     {
@@ -6177,6 +6255,12 @@
         "text-halo-color": "#14161a",
         "text-halo-width": 1.5,
         "text-opacity": 1
+      },
+      "metadata": {
+        "dm-converter:group": "annotation",
+        "dm-converter:opacity": {
+          "text-opacity": 1
+        }
       }
     }
   ]
