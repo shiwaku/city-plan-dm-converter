@@ -150,6 +150,56 @@ const ICON_ROTATE = ['*', -1, ['coalesce', ['to-number', ['get', 'Angle']], 0]]
 /** 等高線と同じ1段低いズームから出す注記の分類コード（基準点・標高点等）。 */
 const KIJUNTEN_CODES = [3001, 3003, 6101, 7301, 7302, 7303, 7304, 7305, 7306, 7307, 7308, 7309, 7311, 7312]
 
+// ---- 記号の大きさの補正 ----
+//
+// dm-sprite のアイコンはすべて 64x64 のキャンバスだが、実際に描画されている領域
+// （bbox）はアイコンごとに 4.4px〜64px とばらつく。icon-size は全コード共通なので、
+// bbox が小さいアイコンだけが小さく見える。
+//
+// dm-sprite 自身の設計基準は bbox 10〜22px（同リポジトリの tools/gen_icons.py）。
+// これを下回るものだけを目標サイズへ引き上げ、基準内のアイコンには手を入れない。
+// 一律に icon-size を上げると、bbox の大きいアイコンが過大になるため。
+//
+// bbox は dm-sprite の tools/inspect_icons.py で実測した値（2026-08-12 時点）。
+// スプライトを更新したら測り直すこと。
+
+/** 補正後の目標 bbox。dm-sprite の設計基準 10〜22px の中央値。 */
+const ICON_TARGET_PX = 18.56
+
+/** 設計基準（10px）を下回るアイコンの実測 bbox。 */
+const ICON_BBOX_PX: Record<string, number> = {
+  '2238': 6.19, // 並木
+  '3401': 6.19, // 門
+  '5226': 9.31, // 滝
+  '6311': 9.94, // 田
+  '6331': 9.94, // 広葉樹林
+  '6340': 9.94, // 砂れき地（未分類）
+  '7311': 4.44, // 標石を有しない標高点
+  '7312': 4.44, // 図化機測定による標高点
+  '8199': 5.94, // 指示点
+}
+
+/**
+ * 標準より小さく描く記号の目標 bbox。
+ * 並木（2238）は図式上も小さい記号だが、実測 6.19px は小さすぎて見えない。
+ * 以前は icon-size に 0.4 倍のハードコードが入っており、実サイズは 1.55px
+ * （ZL15・1/2,500）しかなかった。標準の約65%にあたる 12px を目標にする。
+ */
+const ICON_TARGET_OVERRIDE_PX: Record<string, number> = {
+  '2238': 12,
+}
+
+/** 分類コードから記号の大きさの補正倍率を引く式。基準内のコードは 1.0。 */
+const iconScale = (): unknown[] => {
+  const match: unknown[] = ['match', ['get', 'Code']]
+  for (const [code, bbox] of Object.entries(ICON_BBOX_PX)) {
+    const target = ICON_TARGET_OVERRIDE_PX[code] ?? ICON_TARGET_PX
+    match.push(code, Math.round((target / bbox) * 100) / 100)
+  }
+  match.push(1.0)
+  return match
+}
+
 // ---- 分類コード別の線種（公共測量標準図式） ----
 //
 // 図式の線幅・線種を分類コードごとに再現する。仕様は ttomii/dm-tools（Apache-2.0）の
@@ -295,9 +345,9 @@ const iconSize = (z1: number, s1: number, z2: number, s2: number): unknown[] => 
   ['linear'],
   ['zoom'],
   z1,
-  ['*', s1, ['case', ['==', ['to-string', ['get', 'Code']], '2238'], 0.4, 1.0]],
+  ['*', s1, iconScale()],
   z2,
-  ['*', s2, ['case', ['==', ['to-string', ['get', 'Code']], '2238'], 0.4, 1.0]],
+  ['*', s2, iconScale()],
 ]
 
 /**
