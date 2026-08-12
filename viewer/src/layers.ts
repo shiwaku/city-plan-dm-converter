@@ -166,35 +166,30 @@ const KIJUNTEN_CODES = [3001, 3003, 6101, 7301, 7302, 7303, 7304, 7305, 7306, 73
 /** 補正後の目標 bbox。dm-sprite の設計基準 10〜22px の中央値。 */
 const ICON_TARGET_PX = 18.56
 
-/** 設計基準（10px）を下回るアイコンの実測 bbox。 */
+/**
+ * 設計基準（10px）を下回るアイコンのうち、目標サイズへ引き上げるものの実測 bbox。
+ *
+ * 基準を下回っていても補正しないものがある。いずれも図式上そもそも小さく描く記号で、
+ * 基準の中央値まで引き上げると大きすぎた。
+ *   7311 標石を有しない標高点（4.44px）
+ *   7312 図化機測定による標高点（4.44px）
+ *   8199 指示点（5.94px）
+ *   2238 並木（6.19px）
+ * 標高点と指示点は数値注記と組で読む点記号で、記号そのものを目立たせる必要がない。
+ */
 const ICON_BBOX_PX: Record<string, number> = {
-  '2238': 6.19, // 並木
   '3401': 6.19, // 門
   '5226': 9.31, // 滝
   '6311': 9.94, // 田
   '6331': 9.94, // 広葉樹林
   '6340': 9.94, // 砂れき地（未分類）
-  '7311': 4.44, // 標石を有しない標高点
-  '7312': 4.44, // 図化機測定による標高点
-  '8199': 5.94, // 指示点
 }
 
-/**
- * 標準より小さく描く記号の目標 bbox。
- * 並木（2238）は図式上も小さい記号だが、実測 6.19px は小さすぎて見えない。
- * 以前は icon-size に 0.4 倍のハードコードが入っており、実サイズは 1.55px
- * （ZL15・1/2,500）しかなかった。標準の約65%にあたる 12px を目標にする。
- */
-const ICON_TARGET_OVERRIDE_PX: Record<string, number> = {
-  '2238': 12,
-}
-
-/** 分類コードから記号の大きさの補正倍率を引く式。基準内のコードは 1.0。 */
+/** 分類コードから記号の大きさの補正倍率を引く式。補正しないコードは 1.0。 */
 const iconScale = (): unknown[] => {
   const match: unknown[] = ['match', ['get', 'Code']]
   for (const [code, bbox] of Object.entries(ICON_BBOX_PX)) {
-    const target = ICON_TARGET_OVERRIDE_PX[code] ?? ICON_TARGET_PX
-    match.push(code, Math.round((target / bbox) * 100) / 100)
+    match.push(code, Math.round((ICON_TARGET_PX / bbox) * 100) / 100)
   }
   match.push(1.0)
   return match
