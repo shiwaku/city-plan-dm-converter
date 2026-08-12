@@ -77,6 +77,29 @@ function diag(msg: string): void {
   renderHud()
 }
 
+/**
+ * スプライトに無いアイコンを要求されたら、透明画像を割り当てて何も描かない状態にする。
+ *
+ * 記号（E5）・方向（E6）は分類コードからアイコン名を組み立てるため、スプライトに
+ * 収録されていないコードがあると MapLibre が毎タイル読み込み失敗を報告する。
+ * 以前はコードを列挙して除外していたが、スプライトにアイコンを追加しても除外リストが
+ * 追随せず、描けるはずの地物が出ないままになっていた（方向で436件）。
+ * ここで受け止めることで、列挙を持たずに全コードを描ける。
+ *
+ * 欠けているアイコンは ?debug の HUD に出す。黙って消えると気付けないため。
+ */
+const missingImages = new Set<string>()
+
+function handleMissingImage(id: string): void {
+  if (map.hasImage(id)) return
+  // 1x1 の透明画像。RGBA 4バイト。
+  map.addImage(id, { width: 1, height: 1, data: new Uint8Array(4) })
+  if (!missingImages.has(id)) {
+    missingImages.add(id)
+    diag(`スプライトにアイコンが無い: ${id}`)
+  }
+}
+
 function renderHud(): void {
   if (!DEBUG || !hudEl) return
   const rows = GROUPS.filter((g) => g.on)
@@ -97,6 +120,7 @@ function renderHud(): void {
     `<b>build ${__BUILD_TIME__}</b><br>` +
     `zoom ${map.getZoom().toFixed(1)} · base ${base} · mobile ${isMobile} · ctxLost ${ctxLostCount}<br>` +
     `<u>rendered features / group</u><br>${rows || '(none)'}<br>` +
+    `<u>missing icons</u><br>${[...missingImages].join(', ') || '(none)'}<br>` +
     `<u>log</u><br>${diagLog.join('<br>')}`
 }
 
@@ -407,6 +431,7 @@ buildToggles()
 if (isMobile) panel.classList.add('collapsed')
 renderCollapseBtn()
 renderScaleBadge()
+map.on('styleimagemissing', (ev) => handleMissingImage(ev.id))
 map.on('load', addDataLayers)
 initHud()
 

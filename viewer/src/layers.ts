@@ -140,12 +140,12 @@ const TEXT_ROTATE = [
  */
 const ICON_ROTATE = ['*', -1, ['coalesce', ['to-number', ['get', 'Angle']], 0]]
 
-/**
- * 方向要素のうち、スプライトにアイコンが存在する分類コード。
- * 5227（せき）・7212（露岩）・2219（道路のトンネル）は未収録のため除外する。
- * 除外しないと MapLibre が画像の読み込み失敗を毎タイル報告する。
- */
-const DIRECTION_CODES = [4219, 5241, 4207, 7213, 4205, 5228, 5226, 3401, 7206]
+// 方向（E6）は以前、スプライトにアイコンが無いコードを列挙して除外していた。
+// アイコン追加（9ee1b99）に除外リストが追随せず、実際には存在する
+// 5227（せき）・7212（露岩）・2219（道路のトンネル）の436件が出ないままだった。
+// 同種の取りこぼしを繰り返さないよう、列挙はやめて全コードを描く。
+// アイコンが無い場合は main.ts の styleimagemissing で透明画像を割り当て、
+// 読み込み失敗の報告を出さずに何も描かない状態にする。
 
 /** 等高線と同じ1段低いズームから出す注記の分類コード（基準点・標高点等）。 */
 const KIJUNTEN_CODES = [3001, 3003, 6101, 7301, 7302, 7303, 7304, 7305, 7306, 7307, 7308, 7309, 7311, 7312]
@@ -399,7 +399,6 @@ export function buildLayers(): LayerEntry[] {
       'source-layer': 'kihonzu_10000_direction',
       minzoom: 13,
       maxzoom: SCALE_SWITCH_ZOOM,
-      filter: ['in', ['to-number', ['get', 'Code']], ['literal', DIRECTION_CODES]] as never,
       layout: {
         'icon-image': ['concat', `${DM_SPRITE_ID}:dm-`, ['to-string', ['get', 'Code']]] as never,
         'icon-size': iconSize(13, 0.5, 14, 0.75) as never,
@@ -434,6 +433,9 @@ export function buildLayers(): LayerEntry[] {
           'text-size': 10,
           'text-anchor': 'center',
           'text-offset': [1.5, -1],
+          // 都市計画基本図の注記は測量成果として決まった位置に置かれるものなので、
+          // 衝突判定で間引かせず全部描く。記号（icon-allow-overlap）と揃える。
+          'text-allow-overlap': true,
           'text-rotation-alignment': 'map',
           'text-rotate': TEXT_ROTATE as never,
         },
@@ -530,7 +532,6 @@ export function buildLayers(): LayerEntry[] {
       source: T,
       'source-layer': 'kihonzu_2500_direction',
       minzoom: SCALE_SWITCH_ZOOM,
-      filter: ['in', ['to-number', ['get', 'Code']], ['literal', DIRECTION_CODES]] as never,
       layout: {
         'icon-image': ['concat', `${DM_SPRITE_ID}:dm-`, ['to-string', ['get', 'Code']]] as never,
         'icon-size': iconSize(14, 0.5, 18, 1) as never,
@@ -558,6 +559,9 @@ export function buildLayers(): LayerEntry[] {
         'text-size': ['case', ['in', ['to-number', ['get', 'Code']], ['literal', [7312, 7101]]], 9, 14] as never,
         'text-anchor': 'center',
         'text-offset': [1.5, -1],
+        // 都市計画基本図の注記は測量成果として決まった位置に置かれるものなので、
+        // 衝突判定で間引かせず全部描く。記号（icon-allow-overlap）と揃える。
+        'text-allow-overlap': true,
         'text-rotation-alignment': 'map',
         'text-rotate': TEXT_ROTATE as never,
       },
