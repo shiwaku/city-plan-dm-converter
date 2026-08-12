@@ -73,6 +73,18 @@ VITE_PMTILES_BASE=http://localhost:8787 npm run dev
 
 `output/` には `kihonzu_10000.pmtiles` と `kihonzu_2500.pmtiles` の両方が必要です（片方だけ焼き直した場合、もう一方も配置しておく）。Vite の開発サーバは Range リクエストと CORS に対応しているため、追加の設定は不要です。
 
+### WSL でのファイル監視
+
+WSL から Windows 側（`/mnt/c`）のファイルを見る構成では inotify イベントが届かず、既定の監視方法では**ファイルを書き換えても dev サーバが古い変換結果を返し続けます**。`git checkout` でブランチを切り替えても気付かないため、変更したはずのコードが画面に出ません。
+
+`vite.config.ts` で `server.watch.usePolling` を有効にしてポーリング検知にしています。それでも反映されない場合は dev サーバを再起動し、`node_modules/.vite`（変換キャッシュ）を消してください。
+
+配信されているコードが最新かどうかは、dev サーバの返す内容を直接見れば確認できます。
+
+```bash
+curl -s http://localhost:5174/src/layers.ts | grep -c LINE_STYLES
+```
+
 ### 使用技術
 
 | パッケージ | 用途 |
