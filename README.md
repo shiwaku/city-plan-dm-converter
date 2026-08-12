@@ -582,7 +582,7 @@ vt-optimizer inspect output/kihonzu_10000.pmtiles
 | レイヤー | 除外条件 | 対応するビューワの `minzoom` |
 |---|---|---|
 | 面 | 建物 `3001`〜`3004` を ZL13未満 | 建物は低ズームでは骨格に不要 |
-| 線 | 建物を ZL13未満、等高線 `7101`〜`7104` を ZL12未満 | `line_contour`: 12 / `line_building`: 13 |
+| 線 | 建物を ZL13未満、等高線 `7101`〜`7104` を ZL12未満 | 分類コードごとの出現ズームはタイル側で決まる |
 | 記号 | レイヤーごと ZL13未満 | `symbol`: 13 |
 | 方向 | レイヤーごと ZL13未満 | `direction`: 13 |
 | 注記 | ZL13未満（基準点等のみ ZL12未満） | `annotation`: 13 / `annotation_kijunten`: 12 |
@@ -599,7 +599,7 @@ vt-optimizer inspect output/kihonzu_10000.pmtiles
 ```
 
 - `Code` は文字列属性なので、除外値も文字列で指定します。
-- `$zoom` は整数のタイルズームに対する判定です。MapLibre はベクトルタイルで `tileZoom = floor(zoom)` を使うため、建物が現れる境界はマップズーム13.0になります（12.99以下は非表示）。ビューワの `kihonzu_*_line_building` の `minzoom: 13` と一致します。
+- `$zoom` は整数のタイルズームに対する判定です。MapLibre はベクトルタイルで `tileZoom = floor(zoom)` を使うため、建物が現れる境界はマップズーム13.0になります（12.99以下は非表示）。
 - 最小ZLが13以上の縮尺（1/2,500 は ZL15〜16）では常に条件を満たすため、このフィルタは無影響です。`scripts/build.sh` は縮尺によらず同じフィルタを渡しています。
 - 逆に**最大ZLが12以下の縮尺（1/25,000 は ZL2〜12）では建物が一切含まれなくなります**。1/25,000 を単体で使い建物が必要な場合は、`$zoom` の閾値を下げるかフィルタを外してください。
 - タイルサイズの分布は [vt-optimizer-rs](https://github.com/unvt/vt-optimizer-rs) の `inspect` で確認できます。

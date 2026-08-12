@@ -60,7 +60,7 @@ export const GROUPS: LayerGroup[] = [
   {
     key: 'line',
     name: '線',
-    desc: 'DMの線要素（E2）。道路縁・建物外形・等高線など。歩道は破線、等高線と建物は分類コードで描き分けている。',
+    desc: 'DMの線要素（E2）。道路縁・建物外形・等高線など。公共測量標準図式の線幅（図上0.1〜0.51mm）と線種を分類コードごとに再現している。',
     on: true,
     opacity: 1,
   },
@@ -147,18 +147,148 @@ const ICON_ROTATE = ['*', -1, ['coalesce', ['to-number', ['get', 'Angle']], 0]]
  */
 const DIRECTION_CODES = [4219, 5241, 4207, 7213, 4205, 5228, 5226, 3401, 7206]
 
-const CONTOUR_CODES = [7101, 7102, 7103, 7104]
-const BUILDING_CODES = [3001, 3002, 3003, 3004]
-const SIDEWALK_CODE = 2213
 /** 等高線と同じ1段低いズームから出す注記の分類コード（基準点・標高点等）。 */
 const KIJUNTEN_CODES = [3001, 3003, 6101, 7301, 7302, 7303, 7304, 7305, 7306, 7307, 7308, 7309, 7311, 7312]
 
-const lineOther = (): unknown[] => [
-  'all',
-  ['!=', ['to-number', ['get', 'Code']], SIDEWALK_CODE],
-  ['!', ['in', ['to-number', ['get', 'Code']], ['literal', CONTOUR_CODES]]],
-  ['!', ['in', ['to-number', ['get', 'Code']], ['literal', BUILDING_CODES]]],
+// ---- 分類コード別の線種（公共測量標準図式） ----
+//
+// 図式の線幅・線種を分類コードごとに再現する。仕様は ttomii/dm-tools（Apache-2.0）の
+// dm-preview/static/maplibre/style-2500.json から抽出した。同スタイルはDMのSLDと
+// 図式仕様をもとに手作業で整備されたもので、線幅を図上のミリメートルで表現している。
+//
+// mm   … 図上の線幅（ミリメートル）。縮尺に応じて地上寸法へ換算する
+// dash … line-dasharray。MapLibre では「線幅の倍数」で解釈される（units: line widths）
+//
+// dash はデータ駆動に対応するのが maplibre-gl 5.8.0 以降のため、それ未満では動かない。
+interface LineStyle {
+  mm: number
+  dash?: number[]
+  codes: string[]
+}
+
+const LINE_STYLES: LineStyle[] = [
+  // 実線 — 2306 索道 / 2424 プラットホーム / 3401 門 / 4261 輸送管（地上）ほか
+  { mm: 0.1, codes: ['2306', '2424', '3401', '4261', '4262', '4265', '6101', '6102', '7102', '7106', '7201', '7211', '7212'] },
+  // 実線 — 2101 道路縁（街区線）/ 2214 石段 / 3001 普通建物 / 5101 河川・水がい線 ほか
+  { mm: 0.15, codes: ['2101', '2211', '2214', '2215', '2219', '2226', '2411', '2419', '3001', '4207', '4219', '4231', '4235', '5101', '5102', '5239'] },
+  // 実線 — 6110 被覆 / 6140 塀 / 7101 等高線（計曲線）ほか
+  { mm: 0.2, codes: ['5203', '5226', '5227', '5228', '6110', '6140', '7101', '7105'] },
+  // 実線 — 2203 道路橋（高架部）/ 2205 徒橋 / 2401 鉄道橋（高架部）/ 3002 堅ろう建物
+  { mm: 0.3, codes: ['2203', '2205', '2401', '3002'] },
+  // 実線 — 2301 普通鉄道。図式中で最も太い
+  { mm: 0.51, codes: ['2301'] },
+  // 6130 柵（未分類）・垣
+  { mm: 0.2, dash: [10, 7.5], codes: ['6130'] },
+  // 5105 湖池 / 6301 植生界
+  { mm: 0.1, dash: [5, 5], codes: ['5105', '6301'] },
+  // 7103 等高線（補助曲線）/ 7107 凹地（補助曲線）
+  { mm: 0.1, dash: [100, 5], codes: ['7103', '7107'] },
+  // 2213 歩道 / 3003 普通無壁舎
+  { mm: 0.1, dash: [10, 5], codes: ['2213', '3003'] },
+  // 2106 庭園路等
+  { mm: 0.15, dash: [10, 3.333333], codes: ['2106'] },
+  // 6302 耕地界
+  { mm: 0.1, dash: [30, 10], codes: ['6302'] },
+  // 2103 徒歩道
+  { mm: 0.3, dash: [5, 1.666667], codes: ['2103'] },
+  // 1106 大字・町・丁目界
+  { mm: 0.2, dash: [25, 5], codes: ['1106'] },
+  // 2109 建設中の道路 / 6201 区域界
+  { mm: 0.1, dash: [15, 15], codes: ['2109', '6201'] },
+  // 3402 屋門
+  { mm: 0.15, dash: [3.333333, 1.666667], codes: ['3402'] },
+  // 3004 堅ろう無壁舎。3402 と同じ破線で幅だけ違う
+  { mm: 0.3, dash: [3.333333, 1.666667], codes: ['3004'] },
+  // 1104 町村・指定都市の区界
+  { mm: 0.3, dash: [16.666667, 2.666667, 1.333333, 2.666667], codes: ['1104'] },
+  // 1103 郡市・東京都の区界
+  { mm: 0.3, dash: [16.666667, 2.666667, 1.333333, 2, 1.333333, 2.666667], codes: ['1103'] },
+  // 1110 所属界
+  { mm: 0.3, dash: [16.666667, 26, 1.333333, 2.666667], codes: ['1110'] },
+  // 2428 鉄道の雪覆い等
+  { mm: 0.2, dash: [5, 2.5], codes: ['2428'] },
 ]
+
+/** 表に無い分類コードの線幅。最も件数の多いクラスに寄せる。 */
+const DEFAULT_LINE_MM = 0.1
+
+/**
+ * 図上1mmあたりの画面ピクセル数（ZL15・北緯35度）。
+ * ZL15の分解能は約1.9567 m/px。1/2,500 では図上1mm = 地上2.5m なので 1.2937 px/mm。
+ * 参照スタイルの実測値（0.1mm = 0.1293685px）と一致する。
+ * 縮尺が n 倍粗くなると地上寸法が n 倍になるため、係数も n 倍する。
+ */
+const PX_PER_MM_AT_Z15 = 1.293685
+const pxPerMm = (scaleDenominator: number): number =>
+  PX_PER_MM_AT_Z15 * (scaleDenominator / 2500)
+
+/**
+ * 画面上の最小線幅。図式どおりの実寸だと 0.1mm は ZL15 で 0.13px にしかならず
+ * 事実上見えないため、下限を設けて視認性を確保する。
+ * 図式の幅の比率はこの下限を超えたズームから現れる。
+ *
+ * dasharray は線幅の倍数で解釈されるため、下限が効いている間は破線の間隔も
+ * 実寸より粗くなる。実寸比を保つには dasharray 側を逆補正する必要があるが、
+ * まずは粗くなるのを許容する（issue #39 の案A）。
+ */
+const MIN_LINE_PX = 0.6
+
+/** line-width 式の上端ズーム。MapLibre の最大ズームに合わせる。 */
+const MAX_STYLE_ZOOM = 24
+
+/** 分類コードから図上線幅（mm）を引く式。 */
+const lineMm = (): unknown[] => {
+  const match: unknown[] = ['match', ['get', 'Code']]
+  for (const s of LINE_STYLES) match.push(s.codes, s.mm)
+  match.push(DEFAULT_LINE_MM)
+  return match
+}
+
+/**
+ * 図式の実寸を保ちつつ下限でクランプする line-width 式。
+ *
+ * `["zoom"]` は最上位の interpolate / step の入力にしか置けないため、
+ * `["max", ...]` で包むことはできない。代わりに各ストップの出力側でクランプする。
+ * ストップのズームは定数なので、そこでの倍率も定数に畳める。
+ *
+ * ストップは「最も太いクラスが下限を超えるズーム」から「最も細いクラスが超えるズーム」
+ * までの整数ズームに置く。この範囲の外は全クラスが下限一定か純粋な指数なので、
+ * 両端の2点で正確に表せる（指数の底2と実寸倍率が一致するため）。
+ */
+const lineWidth = (scaleDenominator: number, zMin: number): unknown[] => {
+  const k = pxPerMm(scaleDenominator)
+  const mms = [...LINE_STYLES.map((s) => s.mm), DEFAULT_LINE_MM]
+  const zCross = (mm: number): number =>
+    SCALE_SWITCH_ZOOM + Math.log2(MIN_LINE_PX / (mm * k))
+  const zFrom = Math.floor(zCross(Math.max(...mms)))
+  const zTo = Math.ceil(zCross(Math.min(...mms)))
+
+  const stops = new Set<number>([zMin, MAX_STYLE_ZOOM])
+  for (let z = zFrom; z <= zTo; z++) {
+    if (z > zMin && z < MAX_STYLE_ZOOM) stops.add(z)
+  }
+
+  const expr: unknown[] = ['interpolate', ['exponential', 2], ['zoom']]
+  for (const z of [...stops].sort((a, b) => a - b)) {
+    expr.push(z, ['max', MIN_LINE_PX, ['*', lineMm(), k * 2 ** (z - SCALE_SWITCH_ZOOM)]])
+  }
+  return expr
+}
+
+
+/** 破線を持つ分類コード。 */
+const DASHED_CODES = LINE_STYLES.filter((s) => s.dash).flatMap((s) => s.codes)
+
+/** 分類コードから line-dasharray を引く式。 */
+const lineDash = (): unknown[] => {
+  const match: unknown[] = ['match', ['get', 'Code']]
+  for (const s of LINE_STYLES) {
+    if (s.dash) match.push(s.codes, ['literal', s.dash])
+  }
+  // 到達しない（DASHED_CODES でフィルタ済み）が、match には既定値が必須。
+  match.push(['literal', [1, 0]])
+  return match
+}
 
 const iconSize = (z1: number, s1: number, z2: number, s2: number): unknown[] => [
   'interpolate',
@@ -202,63 +332,42 @@ export function buildLayers(): LayerEntry[] {
       'source-layer': 'kihonzu_10000_polygon',
       minzoom: 2,
       maxzoom: SCALE_SWITCH_ZOOM,
-      paint: { 'line-color': '#000000', 'line-width': 0.3 },
+      paint: { 'line-color': '#000000', 'line-width': lineWidth(10000, 2) as never },
     },
   })
+  // 線は実線と破線の2レイヤーだけ。分類コードごとの幅・破線は match 式で引く。
+  // line-dasharray はデータ駆動でも「レイヤーに設定されているか否か」は切り替えられないため、
+  // 実線と破線でレイヤーを分ける必要がある。
   e.push({
     group: 'line',
     opacity: { 'line-opacity': 1 },
     spec: {
-      id: 'kihonzu_10000_line_sidewalk',
+      id: 'kihonzu_10000_line_solid',
       type: 'line',
       source: S,
       'source-layer': 'kihonzu_10000_line',
       minzoom: 2,
       maxzoom: SCALE_SWITCH_ZOOM,
-      filter: ['==', ['to-number', ['get', 'Code']], SIDEWALK_CODE] as never,
-      paint: { 'line-color': '#000000', 'line-width': 0.5, 'line-dasharray': [5, 5] },
+      filter: ['!', ['in', ['get', 'Code'], ['literal', DASHED_CODES]]] as never,
+      paint: { 'line-color': '#000000', 'line-width': lineWidth(10000, 2) as never },
     },
   })
   e.push({
     group: 'line',
     opacity: { 'line-opacity': 1 },
     spec: {
-      id: 'kihonzu_10000_line_contour',
-      type: 'line',
-      source: S,
-      'source-layer': 'kihonzu_10000_line',
-      minzoom: 12,
-      maxzoom: SCALE_SWITCH_ZOOM,
-      filter: ['in', ['to-number', ['get', 'Code']], ['literal', CONTOUR_CODES]] as never,
-      paint: { 'line-color': '#000000', 'line-width': 0.5 },
-    },
-  })
-  e.push({
-    group: 'line',
-    opacity: { 'line-opacity': 1 },
-    spec: {
-      id: 'kihonzu_10000_line_building',
-      type: 'line',
-      source: S,
-      'source-layer': 'kihonzu_10000_line',
-      minzoom: 13,
-      maxzoom: SCALE_SWITCH_ZOOM,
-      filter: ['in', ['to-number', ['get', 'Code']], ['literal', BUILDING_CODES]] as never,
-      paint: { 'line-color': '#000000', 'line-width': 0.5 },
-    },
-  })
-  e.push({
-    group: 'line',
-    opacity: { 'line-opacity': 1 },
-    spec: {
-      id: 'kihonzu_10000_line_other',
+      id: 'kihonzu_10000_line_dashed',
       type: 'line',
       source: S,
       'source-layer': 'kihonzu_10000_line',
       minzoom: 2,
       maxzoom: SCALE_SWITCH_ZOOM,
-      filter: lineOther() as never,
-      paint: { 'line-color': '#000000', 'line-width': 0.5 },
+      filter: ['in', ['get', 'Code'], ['literal', DASHED_CODES]] as never,
+      paint: {
+        'line-color': '#000000',
+        'line-width': lineWidth(10000, 2) as never,
+        'line-dasharray': lineDash() as never,
+      },
     },
   })
   e.push({
@@ -361,59 +470,37 @@ export function buildLayers(): LayerEntry[] {
       source: T,
       'source-layer': 'kihonzu_2500_polygon',
       minzoom: SCALE_SWITCH_ZOOM,
-      paint: { 'line-color': '#000000', 'line-width': 0.6 },
+      paint: { 'line-color': '#000000', 'line-width': lineWidth(2500, SCALE_SWITCH_ZOOM) as never },
     },
   })
   e.push({
     group: 'line',
     opacity: { 'line-opacity': 1 },
     spec: {
-      id: 'kihonzu_2500_line_sidewalk',
+      id: 'kihonzu_2500_line_solid',
       type: 'line',
       source: T,
       'source-layer': 'kihonzu_2500_line',
       minzoom: SCALE_SWITCH_ZOOM,
-      filter: ['==', ['to-number', ['get', 'Code']], SIDEWALK_CODE] as never,
-      paint: { 'line-color': '#000000', 'line-width': 0.5, 'line-dasharray': [5, 5] },
+      filter: ['!', ['in', ['get', 'Code'], ['literal', DASHED_CODES]]] as never,
+      paint: { 'line-color': '#000000', 'line-width': lineWidth(2500, SCALE_SWITCH_ZOOM) as never },
     },
   })
   e.push({
     group: 'line',
     opacity: { 'line-opacity': 1 },
     spec: {
-      id: 'kihonzu_2500_line_contour',
+      id: 'kihonzu_2500_line_dashed',
       type: 'line',
       source: T,
       'source-layer': 'kihonzu_2500_line',
       minzoom: SCALE_SWITCH_ZOOM,
-      filter: ['in', ['to-number', ['get', 'Code']], ['literal', CONTOUR_CODES]] as never,
-      paint: { 'line-color': '#000000', 'line-width': 0.5 },
-    },
-  })
-  e.push({
-    group: 'line',
-    opacity: { 'line-opacity': 1 },
-    spec: {
-      id: 'kihonzu_2500_line_building',
-      type: 'line',
-      source: T,
-      'source-layer': 'kihonzu_2500_line',
-      minzoom: SCALE_SWITCH_ZOOM,
-      filter: ['in', ['to-number', ['get', 'Code']], ['literal', BUILDING_CODES]] as never,
-      paint: { 'line-color': '#000000', 'line-width': 1 },
-    },
-  })
-  e.push({
-    group: 'line',
-    opacity: { 'line-opacity': 1 },
-    spec: {
-      id: 'kihonzu_2500_line_other',
-      type: 'line',
-      source: T,
-      'source-layer': 'kihonzu_2500_line',
-      minzoom: SCALE_SWITCH_ZOOM,
-      filter: lineOther() as never,
-      paint: { 'line-color': '#000000', 'line-width': 1 },
+      filter: ['in', ['get', 'Code'], ['literal', DASHED_CODES]] as never,
+      paint: {
+        'line-color': '#000000',
+        'line-width': lineWidth(2500, SCALE_SWITCH_ZOOM) as never,
+        'line-dasharray': lineDash() as never,
+      },
     },
   })
   e.push({
