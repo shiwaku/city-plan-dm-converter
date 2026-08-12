@@ -352,23 +352,10 @@ const visibleLayerIds = (): string[] =>
 const queryLayerIds = (): string[] =>
   visibleLayerIds().filter((id) => !id.endsWith('_polygon_outline'))
 
-/**
- * クリック判定の半径（px）。
- * 線の当たり判定は描画された線幅の半分しかない（MapLibre の LineStyleLayer#queryRadius）。
- * 図式どおりの細い線は 0.6px しかなく点クリックではほぼ当たらないため、
- * 点ではなく矩形で問い合わせる。
- */
-const CLICK_RADIUS_PX = 5
-
-const boxAround = (p: maplibregl.Point): [maplibregl.PointLike, maplibregl.PointLike] => [
-  [p.x - CLICK_RADIUS_PX, p.y - CLICK_RADIUS_PX],
-  [p.x + CLICK_RADIUS_PX, p.y + CLICK_RADIUS_PX],
-]
-
 if (window.matchMedia('(hover: hover)').matches) {
   map.on('mousemove', (ev) => {
     const ids = queryLayerIds()
-    const hit = ids.length > 0 && map.queryRenderedFeatures(boxAround(ev.point), { layers: ids }).length > 0
+    const hit = ids.length > 0 && map.queryRenderedFeatures(ev.point, { layers: ids }).length > 0
     map.getCanvas().style.cursor = hit ? 'pointer' : ''
   })
 }
@@ -377,7 +364,7 @@ if (window.matchMedia('(hover: hover)').matches) {
 let popup: maplibregl.Popup | null = null
 map.on('click', (ev) => {
   const ids = queryLayerIds()
-  const feats = ids.length ? map.queryRenderedFeatures(boxAround(ev.point), { layers: ids }) : []
+  const feats = ids.length ? map.queryRenderedFeatures(ev.point, { layers: ids }) : []
   if (!feats.length) return
 
   // タイル境界をまたぐ地物は、タイルごとに1回ずつ返る。同じレイヤーで属性が
