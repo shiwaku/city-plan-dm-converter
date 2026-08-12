@@ -55,6 +55,9 @@ function convertFiles(files, writers, onFile) {
         w.setGeometry(5, dat.XYList);
         w.setPropertie('Code', dat.LAYER || '');
         w.setPropertie('Elno', dat.ELNO || '');
+        // 1要素に複数の方向ベクトルが入ることがあり、その場合 Elno が重複する。
+        // 要素内の通し番号を併記して区別できるようにする。
+        w.setPropertie('Seq', dat.SEQ !== undefined ? dat.SEQ : '');
         w.setPropertie('Angle', dat.ANGLE !== undefined ? dat.ANGLE : '');
         w.setPropertie('RecordType', dat.RECORD_TYPE || '');
         w.setPropertie('DataType', dat.DATA_TYPE || '');

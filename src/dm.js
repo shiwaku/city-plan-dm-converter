@@ -136,30 +136,53 @@ class DM {
 
         } else if (curRectype === 'E6') {
           // 方向（E6）
-          // 起点と方向点の2点で1件。第1点が地物の位置、第1点→第2点が向きを表す。
+          // 起点と方向点の2点で1本。第1点が地物の位置、第1点→第2点が向きを表す。
           // 2点間の距離は図上の記号長に相当する定型値であり実長ではないため、
           // 線としては出力せず、起点のみを点として持ち角度に変換する。
-          const rec2 = lines[recno + 1];
-          if (!rec2) break;
-          // 代表点座標（センチメートルからメートルに変換）
-          const x1 = parseFloat(decode(rec2, 0, 7)) / 100;
-          const y1 = parseFloat(decode(rec2, 7, 14)) / 100;
-          const x2 = parseFloat(decode(rec2, 14, 21)) / 100;
-          const y2 = parseFloat(decode(rec2, 21, 28)) / 100;
-          // DMのXは北方向、Yは東方向。水平右（東）を0度とする反時計回りの度数に直す。
-          // E7（注記）のANGLEと同じ規約に揃えてあるため、描画側は同じ変換で扱える。
-          const angle = Math.round(Math.atan2(x2 - x1, y2 - y1) * 180 / Math.PI);
-          this._elementDict[dictSeqno] = {
-            FIGTYPE: curRectype,
-            LAYER: layercode,
-            ELNO: elno,
-            XYList: [ldy + y1, ldx + x1],
-            ANGLE: angle,
-            RECORD_TYPE: curRectype,
-            DATA_KIND: datakind,
-            DATA_TYPE: datatype
-          };
-          dictSeqno++;
+          //
+          // 1要素に複数本入ることがある（データ数が2を超える）。以前は先頭2点だけを
+          // 読んでいたため、残りのペアを捨てていた。ペアごとに1フィーチャを出力する。
+          // 同一要素から複数出るので Elno が重複する。要素内の通し番号を SEQ で持たせる。
+          //
+          // 実データ区分が3・6（三次元）は1点21バイト。二次元は14バイト。
+          const stride = (datakind === '3' || datakind === '6') ? 21 : 14;
+          // 1レコードは84バイト。二次元は6点、三次元は4点入る。
+          const perRecord = Math.floor(84 / stride);
+          const pts = [];
+          let truncated = false;
+          for (let i = 0; i < datacnt; i++) {
+            // 読み出しはヘッダ位置からの相対で求め、recno は動かさない。
+            // データ数と実データ行数が食い違っても後続のレコード解釈がずれないようにする。
+            const rec = lines[recno + 1 + Math.floor(i / perRecord)];
+            if (!rec) { truncated = true; break; }
+            const s = (i % perRecord) * stride;
+            // 代表点座標（センチメートルからメートルに変換）
+            pts.push([
+              parseFloat(decode(rec, s, s + 7)) / 100,
+              parseFloat(decode(rec, s + 7, s + 14)) / 100
+            ]);
+          }
+          if (truncated) break;
+          // 2点ずつで1本。端数の1点は向きを決められないため捨てる。
+          for (let i = 0; i + 1 < pts.length; i += 2) {
+            const [x1, y1] = pts[i];
+            const [x2, y2] = pts[i + 1];
+            // DMのXは北方向、Yは東方向。水平右（東）を0度とする反時計回りの度数に直す。
+            // E7（注記）のANGLEと同じ規約に揃えてあるため、描画側は同じ変換で扱える。
+            const angle = Math.round(Math.atan2(x2 - x1, y2 - y1) * 180 / Math.PI);
+            this._elementDict[dictSeqno] = {
+              FIGTYPE: curRectype,
+              LAYER: layercode,
+              ELNO: elno,
+              SEQ: i / 2 + 1,
+              XYList: [ldy + y1, ldx + x1],
+              ANGLE: angle,
+              RECORD_TYPE: curRectype,
+              DATA_KIND: datakind,
+              DATA_TYPE: datatype
+            };
+            dictSeqno++;
+          }
           recno += recordcnt + 1;
 
         } else if (curRectype === 'E7') {
