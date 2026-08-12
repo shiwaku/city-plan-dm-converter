@@ -585,7 +585,7 @@ vt-optimizer inspect output/kihonzu_10000.pmtiles
 | 線 | 建物を ZL13未満、等高線 `7101`〜`7104` を ZL12未満 | 分類コードごとの出現ズームはタイル側で決まる |
 | 記号 | レイヤーごと ZL13未満 | `symbol`: 13 |
 | 方向 | レイヤーごと ZL13未満 | `direction`: 13 |
-| 注記 | ZL13未満（基準点等のみ ZL12未満） | `annotation`: 13 / `annotation_kijunten`: 12 |
+| 注記 | ZL13未満 | `annotation`: 13 |
 
 **`scripts/build.sh` の閾値はビューワの `minzoom` と対になっています。片方を変えたら両方直してください。** 対応表は [viewer/README.md の「1/10,000 レイヤー一覧」](viewer/README.md#110000-レイヤー一覧)にあります。
 

@@ -147,8 +147,11 @@ const ICON_ROTATE = ['*', -1, ['coalesce', ['to-number', ['get', 'Angle']], 0]]
 // アイコンが無い場合は main.ts の styleimagemissing で透明画像を割り当て、
 // 読み込み失敗の報告を出さずに何も描かない状態にする。
 
-/** 等高線と同じ1段低いズームから出す注記の分類コード（基準点・標高点等）。 */
-const KIJUNTEN_CODES = [3001, 3003, 6101, 7301, 7302, 7303, 7304, 7305, 7306, 7307, 7308, 7309, 7311, 7312]
+/**
+ * 注記を出し始めるズーム。これ未満では文字が小さすぎて読めないため出さない。
+ * scripts/build.sh の ANNOTATION_MIN_ZOOM / KIJUNTEN_MIN_ZOOM と対になっている。
+ */
+const ANNOTATION_MIN_ZOOM = 13
 
 // ---- 記号の大きさの補正 ----
 //
@@ -456,43 +459,39 @@ export function buildLayers(): LayerEntry[] {
     },
   })
 
-  for (const [id, minzoom, kijunten] of [
-    ['kihonzu_10000_annotation', 13, false],
-    ['kihonzu_10000_annotation_kijunten', 12, true],
-  ] as [string, number, boolean][]) {
-    const inKijunten = ['in', ['to-number', ['get', 'Code']], ['literal', KIJUNTEN_CODES]]
-    e.push({
-      group: 'annotation',
-      opacity: { 'text-opacity': 1 },
-      spec: {
-        id,
-        type: 'symbol',
-        source: S,
-        'source-layer': 'kihonzu_10000_annotation',
-        minzoom,
-        maxzoom: SCALE_SWITCH_ZOOM,
-        filter: (kijunten ? inKijunten : ['!', inKijunten]) as never,
-        layout: {
-          'text-field': ['coalesce', ['get', 'Text'], ''] as never,
-          'text-font': TEXT_FONT,
-          'text-size': 10,
-          'text-anchor': 'center',
-          'text-offset': [1.5, -1],
-          // 都市計画基本図の注記は測量成果として決まった位置に置かれるものなので、
-          // 衝突判定で間引かせず全部描く。記号（icon-allow-overlap）と揃える。
-          'text-allow-overlap': true,
-          'text-rotation-alignment': 'map',
-          'text-rotate': TEXT_ROTATE as never,
-        },
-        paint: {
-          'text-color': '#000',
-          'text-halo-color': '#fff',
-          'text-halo-width': 1.5,
-          'text-opacity': 1,
-        },
+  // 注記は ZL13 未満では文字が小さすぎて読めないため出さない。
+  // 以前は基準点等の注記（KIJUNTEN_CODES）だけ1段低い ZL12 から出していたが、
+  // そのズームでは読めないため分ける意味がなく、1レイヤーに統合した。
+  e.push({
+    group: 'annotation',
+    opacity: { 'text-opacity': 1 },
+    spec: {
+      id: 'kihonzu_10000_annotation',
+      type: 'symbol',
+      source: S,
+      'source-layer': 'kihonzu_10000_annotation',
+      minzoom: ANNOTATION_MIN_ZOOM,
+      maxzoom: SCALE_SWITCH_ZOOM,
+      layout: {
+        'text-field': ['coalesce', ['get', 'Text'], ''] as never,
+        'text-font': TEXT_FONT,
+        'text-size': 10,
+        'text-anchor': 'center',
+        'text-offset': [1.5, -1],
+        // 都市計画基本図の注記は測量成果として決まった位置に置かれるものなので、
+        // 衝突判定で間引かせず全部描く。記号（icon-allow-overlap）と揃える。
+        'text-allow-overlap': true,
+        'text-rotation-alignment': 'map',
+        'text-rotate': TEXT_ROTATE as never,
       },
-    })
-  }
+      paint: {
+        'text-color': '#000',
+        'text-halo-color': '#fff',
+        'text-halo-width': 1.5,
+        'text-opacity': 1,
+      },
+    },
+  })
 
   // ---- 1/2,500（z15〜） ----
   const T = 'kihonzu_2500'
