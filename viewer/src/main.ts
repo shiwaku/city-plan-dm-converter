@@ -11,6 +11,8 @@ import {
   groupOf,
   inkFor,
   popupHtml,
+  POPUP_MAX_ITEMS,
+  type PopupItem,
   type GroupKey,
   type LayerEntry,
   type LayerGroup,
@@ -356,9 +358,20 @@ map.on('click', (ev) => {
   const ids = visibleLayerIds()
   const feats = ids.length ? map.queryRenderedFeatures(ev.point, { layers: ids }) : []
   if (!feats.length) return
-  const f = feats[0]
-  const entry = LAYERS.find((l) => l.spec.id === f.layer.id)
-  const name = entry ? groupOf(entry.group).name : f.layer.id
+
+  // 同じ地物が複数レイヤーで返る（面は塗りと輪郭の2枚で描いている）ため、
+  // ソースレイヤーと属性が一致するものは1件にまとめる。
+  const seen = new Set<string>()
+  const items: PopupItem[] = []
+  for (const f of feats) {
+    const props = (f.properties ?? {}) as Record<string, unknown>
+    const key = `${f.sourceLayer ?? f.source}|${JSON.stringify(props)}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    const entry = LAYERS.find((l) => l.spec.id === f.layer.id)
+    items.push({ groupName: entry ? groupOf(entry.group).name : f.layer.id, props })
+  }
+
   if (popup) {
     const old = popup
     popup = null
@@ -366,7 +379,7 @@ map.on('click', (ev) => {
   }
   const p = new maplibregl.Popup({ closeButton: true, maxWidth: '320px' })
     .setLngLat(ev.lngLat)
-    .setHTML(popupHtml(name, f.properties as Record<string, unknown>))
+    .setHTML(popupHtml(items.slice(0, POPUP_MAX_ITEMS), items.length))
     .addTo(map)
   p.on('close', () => {
     if (popup === p) popup = null

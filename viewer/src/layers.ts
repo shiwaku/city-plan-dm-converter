@@ -499,20 +499,55 @@ const ATTR_LABELS: Record<string, string> = {
   KAKUDO: '角度',
 }
 
-export function popupHtml(groupName: string, props: Record<string, unknown>): string {
-  const row = (label: string, value: unknown): string =>
-    `<tr><th>${label}</th><td>${String(value)}</td></tr>`
+/** ポップアップに並べる1件分。クリック地点で重なっている地物ごとに1つ。 */
+export interface PopupItem {
+  groupName: string
+  props: Record<string, unknown>
+}
 
-  const parts: string[] = []
-  // 分類コードの直後に名称を出す。コードだけでは地物種別が分からないため。
-  if (props.Code !== undefined && props.Code !== '') {
-    parts.push(row(ATTR_LABELS.Code, props.Code))
-    const name = codeName(props.Code)
-    parts.push(row('名称', name ?? '（標準図式に記載なし）'))
+/** 1回のクリックで表示する地物数の上限。これを超えた分は件数だけ知らせる。 */
+export const POPUP_MAX_ITEMS = 20
+
+/** 注記文字列に < などが含まれてもポップアップが壊れないようにする。 */
+const escapeHtml = (v: unknown): string =>
+  String(v).replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!,
+  )
+
+/**
+ * クリック時のポップアップ本文。重なっている地物をすべて並べる。
+ * 地物が1件なら見出しはグループ名、複数なら件数を出す。
+ */
+export function popupHtml(items: PopupItem[], total = items.length): string {
+  const row = (label: string, value: unknown): string =>
+    `<tr><th>${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`
+
+  const section = (item: PopupItem): string => {
+    const { groupName, props } = item
+    const parts: string[] = []
+    // 分類コードの直後に名称を出す。コードだけでは地物種別が分からないため。
+    if (props.Code !== undefined && props.Code !== '') {
+      parts.push(row(ATTR_LABELS.Code, props.Code))
+      parts.push(row('名称', codeName(props.Code) ?? '（標準図式に記載なし）'))
+    }
+    for (const [k, v] of Object.entries(props)) {
+      if (k === 'Code' || v === null || v === undefined || v === '') continue
+      parts.push(row(ATTR_LABELS[k] ?? k, v))
+    }
+    // 複数件のときだけ、どの地物かを見出しで示す。
+    const code =
+      props.Code === undefined || props.Code === '' ? '' : ` — ${escapeHtml(props.Code)}`
+    const head =
+      items.length > 1 ? `<h4 class="pop-item-head">${escapeHtml(groupName)}${code}</h4>` : ''
+    return `<section class="pop-item">${head}<table class="pop-tbl">${parts.join('')}</table></section>`
   }
-  for (const [k, v] of Object.entries(props)) {
-    if (k === 'Code' || v === null || v === undefined || v === '') continue
-    parts.push(row(ATTR_LABELS[k] ?? k, v))
-  }
-  return `<div class="pop"><div class="pop-head">${groupName}</div><table class="pop-tbl">${parts.join('')}</table></div>`
+
+  const head =
+    items.length > 1
+      ? `${total}件の地物${total > items.length ? `（うち${items.length}件を表示）` : ''}`
+      : escapeHtml(items[0]?.groupName ?? '')
+  return `<div class="pop"><div class="pop-head">${head}</div><div class="pop-body">${items
+    .map(section)
+    .join('')}</div></div>`
 }
