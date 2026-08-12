@@ -11,6 +11,8 @@ import {
   groupOf,
   inkFor,
   popupHtml,
+  POPUP_MAX_ITEMS,
+  type PopupItem,
   type GroupKey,
   type LayerEntry,
   type LayerGroup,
@@ -342,9 +344,17 @@ const visibleLayerIds = (): string[] =>
     .map((l) => l.spec.id)
     .filter((id) => map.getLayer(id))
 
+/**
+ * 地物取得の対象レイヤー。面は塗りと輪郭の2レイヤーで描いているため、
+ * 輪郭を除いて塗りだけを見る。両方を対象にすると同じ地物が2回返る。
+ * 線の実線/破線はフィルタが排他なので、両方を対象にしても重複しない。
+ */
+const queryLayerIds = (): string[] =>
+  visibleLayerIds().filter((id) => !id.endsWith('_polygon_outline'))
+
 if (window.matchMedia('(hover: hover)').matches) {
   map.on('mousemove', (ev) => {
-    const ids = visibleLayerIds()
+    const ids = queryLayerIds()
     const hit = ids.length > 0 && map.queryRenderedFeatures(ev.point, { layers: ids }).length > 0
     map.getCanvas().style.cursor = hit ? 'pointer' : ''
   })
@@ -353,12 +363,26 @@ if (window.matchMedia('(hover: hover)').matches) {
 // ---- クリックポップアップ ----
 let popup: maplibregl.Popup | null = null
 map.on('click', (ev) => {
-  const ids = visibleLayerIds()
+  const ids = queryLayerIds()
   const feats = ids.length ? map.queryRenderedFeatures(ev.point, { layers: ids }) : []
   if (!feats.length) return
-  const f = feats[0]
-  const entry = LAYERS.find((l) => l.spec.id === f.layer.id)
-  const name = entry ? groupOf(entry.group).name : f.layer.id
+
+  // タイル境界をまたぐ地物は、タイルごとに1回ずつ返る。同じレイヤーで属性が
+  // 完全に一致するものは1件にまとめてこれを抑える。
+  // ただし #36 で Elno（要素識別番号）をタイルから落としたため、属性が Code だけの
+  // 地物は互いに区別できない。隣接する同種の地物が同時に当たると1件に潰れる。
+  // 厳密に分けるにはタイル側に地物IDが必要（tippecanoe の --generate-ids）。
+  const seen = new Set<string>()
+  const items: PopupItem[] = []
+  for (const f of feats) {
+    const props = (f.properties ?? {}) as Record<string, unknown>
+    const key = `${f.layer.id}|${JSON.stringify(props)}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    const entry = LAYERS.find((l) => l.spec.id === f.layer.id)
+    items.push({ groupName: entry ? groupOf(entry.group).name : f.layer.id, props })
+  }
+
   if (popup) {
     const old = popup
     popup = null
@@ -366,7 +390,7 @@ map.on('click', (ev) => {
   }
   const p = new maplibregl.Popup({ closeButton: true, maxWidth: '320px' })
     .setLngLat(ev.lngLat)
-    .setHTML(popupHtml(name, f.properties as Record<string, unknown>))
+    .setHTML(popupHtml(items.slice(0, POPUP_MAX_ITEMS), items.length))
     .addTo(map)
   p.on('close', () => {
     if (popup === p) popup = null
