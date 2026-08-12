@@ -344,10 +344,31 @@ const visibleLayerIds = (): string[] =>
     .map((l) => l.spec.id)
     .filter((id) => map.getLayer(id))
 
+/**
+ * 地物取得の対象レイヤー。面は塗りと輪郭の2レイヤーで描いているため、
+ * 輪郭を除いて塗りだけを見る。両方を対象にすると同じ地物が2回返る。
+ * 線の実線/破線はフィルタが排他なので、両方を対象にしても重複しない。
+ */
+const queryLayerIds = (): string[] =>
+  visibleLayerIds().filter((id) => !id.endsWith('_polygon_outline'))
+
+/**
+ * クリック判定の半径（px）。
+ * 線の当たり判定は描画された線幅の半分しかない（MapLibre の LineStyleLayer#queryRadius）。
+ * 図式どおりの細い線は 0.6px しかなく点クリックではほぼ当たらないため、
+ * 点ではなく矩形で問い合わせる。
+ */
+const CLICK_RADIUS_PX = 5
+
+const boxAround = (p: maplibregl.Point): [maplibregl.PointLike, maplibregl.PointLike] => [
+  [p.x - CLICK_RADIUS_PX, p.y - CLICK_RADIUS_PX],
+  [p.x + CLICK_RADIUS_PX, p.y + CLICK_RADIUS_PX],
+]
+
 if (window.matchMedia('(hover: hover)').matches) {
   map.on('mousemove', (ev) => {
-    const ids = visibleLayerIds()
-    const hit = ids.length > 0 && map.queryRenderedFeatures(ev.point, { layers: ids }).length > 0
+    const ids = queryLayerIds()
+    const hit = ids.length > 0 && map.queryRenderedFeatures(boxAround(ev.point), { layers: ids }).length > 0
     map.getCanvas().style.cursor = hit ? 'pointer' : ''
   })
 }
@@ -355,17 +376,20 @@ if (window.matchMedia('(hover: hover)').matches) {
 // ---- クリックポップアップ ----
 let popup: maplibregl.Popup | null = null
 map.on('click', (ev) => {
-  const ids = visibleLayerIds()
-  const feats = ids.length ? map.queryRenderedFeatures(ev.point, { layers: ids }) : []
+  const ids = queryLayerIds()
+  const feats = ids.length ? map.queryRenderedFeatures(boxAround(ev.point), { layers: ids }) : []
   if (!feats.length) return
 
-  // 同じ地物が複数レイヤーで返る（面は塗りと輪郭の2枚で描いている）ため、
-  // ソースレイヤーと属性が一致するものは1件にまとめる。
+  // タイル境界をまたぐ地物は、タイルごとに1回ずつ返る。同じレイヤーで属性が
+  // 完全に一致するものは1件にまとめてこれを抑える。
+  // ただし #36 で Elno（要素識別番号）をタイルから落としたため、属性が Code だけの
+  // 地物は互いに区別できない。隣接する同種の地物が同時に当たると1件に潰れる。
+  // 厳密に分けるにはタイル側に地物IDが必要（tippecanoe の --generate-ids）。
   const seen = new Set<string>()
   const items: PopupItem[] = []
   for (const f of feats) {
     const props = (f.properties ?? {}) as Record<string, unknown>
-    const key = `${f.sourceLayer ?? f.source}|${JSON.stringify(props)}`
+    const key = `${f.layer.id}|${JSON.stringify(props)}`
     if (seen.has(key)) continue
     seen.add(key)
     const entry = LAYERS.find((l) => l.spec.id === f.layer.id)
