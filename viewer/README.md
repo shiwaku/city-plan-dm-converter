@@ -130,10 +130,8 @@ PMTilesファイルはレンタルサーバ（`shiworks2.xsrv.jp/shizuoka-city/`
 |-----------|------|--------:|--------:|
 | kihonzu_10000_polygon_fill | 面（塗り） | 2 | 15 |
 | kihonzu_10000_polygon_outline | 面（輪郭） | 2 | 15 |
-| kihonzu_10000_line_sidewalk | 線（歩道: Code 2213） | 2 | 15 |
-| kihonzu_10000_line_contour | 線（等高線: Code 7101〜7104） | 12 | 15 |
-| kihonzu_10000_line_building | 線（建物: Code 3001〜3004） | 13 | 15 |
-| kihonzu_10000_line_other | 線（その他） | 2 | 15 |
+| kihonzu_10000_line_solid | 線（実線の分類コード） | 2 | 15 |
+| kihonzu_10000_line_dashed | 線（破線の分類コード） | 2 | 15 |
 | kihonzu_10000_symbol | 記号 | 13 | 15 |
 | kihonzu_10000_direction | 方向（角度に従って記号を回転） | 13 | 15 |
 | kihonzu_10000_annotation | 注記（基準点等を除く） | 13 | 15 |
