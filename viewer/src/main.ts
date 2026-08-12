@@ -10,6 +10,7 @@ import {
   buildLayers,
   groupOf,
   inkFor,
+  inkPaint,
   popupHtml,
   POPUP_MAX_ITEMS,
   type PopupItem,
@@ -154,25 +155,18 @@ function addDataLayers(): void {
   applyInk()
 }
 
-/** 背景の明暗に合わせて基本図の線・文字色を入れ替える。 */
+/**
+ * 背景の明暗に合わせて基本図の線・文字色を入れ替える。
+ * 差し替えるプロパティの判定は layers.ts の inkPaint に置き、静的スタイルの
+ * 書き出し（buildStyle）と共有する。
+ */
 function applyInk(): void {
   const ink = inkFor(theme)
   for (const entry of LAYERS) {
     const id = entry.spec.id
     if (!map.getLayer(id)) continue
-    switch (entry.spec.type) {
-      case 'line':
-        map.setPaintProperty(id, 'line-color', ink.line)
-        break
-      case 'fill':
-        map.setPaintProperty(id, 'fill-color', ink.fill)
-        break
-      case 'symbol':
-        if (entry.group === 'annotation') {
-          map.setPaintProperty(id, 'text-color', ink.text)
-          map.setPaintProperty(id, 'text-halo-color', ink.halo)
-        }
-        break
+    for (const [prop, value] of Object.entries(inkPaint(entry.spec.type, entry.group, ink))) {
+      map.setPaintProperty(id, prop, value)
     }
   }
 }

@@ -93,7 +93,7 @@ export type Basemap = 'pale' | 'std' | 'photo' | 'blank'
 // スタイルを返す直前に必ず注入する。
 // 本家 geolonia/smartcity-dm-sprite には静岡市データで使う記号のうち6件
 // （2219/3519/3531/5227/6335/7212）が無いため、それらを追加した fork を参照している。
-const DM_SPRITE_URL = 'https://shiwaku.github.io/dm-sprite/sprite'
+export const DM_SPRITE_URL = 'https://shiwaku.github.io/dm-sprite/sprite'
 export const DM_SPRITE_ID = 'dm'
 
 interface SpriteEntry {
@@ -111,7 +111,7 @@ function withDmSprite(style: StyleSpecification): StyleSpecification {
   return { ...style, sprite: list } as StyleSpecification
 }
 
-const GLYPHS = 'https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf'
+export const GLYPHS = 'https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf'
 
 /** 素のスタイル（public/*.json）のキャッシュ。 */
 const rawCache = new Map<string, StyleSpecification>()

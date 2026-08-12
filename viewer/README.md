@@ -105,9 +105,14 @@ viewer/
 ├── package-lock.json
 ├── tsconfig.json           # TypeScript設定
 ├── vite.config.ts          # Vite設定（base は /dm-converter/、ビルド時刻の埋め込み）
+├── scripts/
+│   └── export-style.mjs    # 基本図のスタイルを静的JSONへ書き出す
 ├── public/
 │   ├── pale.json           # 最適化ベクトルタイル スタイル定義（淡色地図風・既定）
 │   ├── std.json            # 最適化ベクトルタイル スタイル定義（標準地図風）
+│   ├── style/              # 書き出した基本図のスタイル（生成物）
+│   │   ├── kihonzu-light.json
+│   │   └── kihonzu-dark.json
 │   ├── manifest.webmanifest # PWAマニフェスト
 │   ├── icon.svg            # アプリアイコン
 │   └── sw.js               # Service Worker（HTMLのみネットワーク優先）
@@ -123,7 +128,7 @@ viewer/
 
 地図記号のスプライトはリポジトリに同梱せず、[dm-sprite](https://github.com/shiwaku/dm-sprite) の GitHub Pages から読み込みます。静岡市データで使う記号のうち6コードが本家に無いため、それらを追加した fork を参照しています。背景スタイルを切り替えても記号が出るよう、`basemap.ts` がスタイルを返す直前に毎回注入します（地理院スタイル側のスプライトを `default`、追加分を `dm:` 接頭辞で参照）。
 
-PMTilesファイルはレンタルサーバ（`shiworks2.xsrv.jp/shizuoka-city/`）にホスティングしています。GitHub Pages への同梱は、1/2,500 が116MBあり Git の100MBファイル制限を超えるため行っていません。
+PMTilesファイルはレンタルサーバ（`shiworks2.xsrv.jp/shizuoka-city/`）にホスティングしています。タイルの軽量化（1/2,500 が84MB、1/10,000 が39MB）で Git の100MBファイル制限は下回るようになりましたが、更新のたびに履歴が膨らむため引き続き外部ホスティングにしています。
 
 ---
 
@@ -151,6 +156,57 @@ PMTilesファイルはレンタルサーバ（`shiworks2.xsrv.jp/shizuoka-city/`
 注記は z13 未満では文字が小さすぎて読めないため表示しません。以前は基準点・標高点等の注記だけ1段低い z12 から出していましたが、そのズームでは読めないため分けるのをやめ、1レイヤーに統合しました。
 
 ---
+
+## スタイルの静的JSON書き出し
+
+基本図のレイヤー定義は `src/layers.ts` のコードで組み立てています。背景地図の切替とテーマの色差し替えを実行時に行うためで、スタイル全体を表す JSON はビューワ内には存在しません。
+
+そのままでは外部ツールに渡せないため、静的な MapLibre スタイルとして書き出せるようにしています。
+
+```bash
+cd viewer
+npm run export:style
+```
+
+`public/style/kihonzu-light.json` と `kihonzu-dark.json` が生成されます。GitHub Pages にも載るため、次のURLで参照できます。
+
+- https://shiwaku.github.io/dm-converter/style/kihonzu-light.json
+- https://shiwaku.github.io/dm-converter/style/kihonzu-dark.json
+
+**この JSON は生成物です。直接編集せず、`src/layers.ts` を直して書き出し直してください。** 書き出し時に `validateStyleMin` でスタイル仕様への適合を検証しており、不正なら書き出しは失敗します。
+
+### 中身
+
+| 含むもの | 含まないもの |
+|---|---|
+| 単色の背景（白図）、基本図の全14レイヤー、PMTilesのソース定義、グリフとスプライトの参照、測量成果の出典表示 | 背景地図（地理院の最適化ベクトルタイル）。第三者のスタイルを再配布しないため |
+
+グループの表示・不透明度はビューワのUIで動かすものなので、既定値（全表示・不透明度1）で固定しています。
+
+### `pmtiles://` を解せるツールが必要
+
+ソースのURLは `pmtiles://https://.../kihonzu_10000.pmtiles` の形式です。これは MapLibre GL JS に [pmtiles](https://github.com/protomaps/PMTiles) パッケージでプロトコルを登録して初めて解決できるもので、**すべてのツールで開けるわけではありません。**
+
+| ツール | 可否 |
+|---|---|
+| MapLibre GL JS を使うアプリ（`addProtocol` を登録） | ○ |
+| Maputnik | × |
+| QGIS | × |
+
+XYZ 配信を挟めば解決します。
+
+```bash
+pmtiles serve output --port 8787
+# → http://localhost:8787/kihonzu_10000/{z}/{x}/{y}.mvt
+```
+
+この場合はソースのURLを差し替える必要があります（書き出しスクリプトにはまだオプションを設けていません）。
+
+### ビューワ自身は使っていない
+
+ビューワは背景地図の切替とテーマのダーク化のためにレイヤーを実行時に組み立てており、この静的JSONに置き換えると背景地図の切替ができなくなります。あくまで外部ツールに渡すための成果物として持っています。
+
+テーマ色を差し替えるプロパティの判定は `src/layers.ts` の `inkPaint()` に1つだけ置き、実行中の地図に当てる `main.ts` の `applyInk()` と、書き出しの `buildStyle()` の両方から使っています。片方だけ直すと見た目が食い違うためです。
 
 ## ベクトルタイル
 
@@ -183,4 +239,4 @@ PMTilesファイルはレンタルサーバ（`shiworks2.xsrv.jp/shizuoka-city/`
 
 タイルサイズを抑えるため、`scripts/build.sh` は描画に必要な属性だけを残しています（`-y Code -y Text -y Angle`）。`src/layers.ts` の式が参照できるのはこの3つだけで、`Elno` などをスタイルやポップアップで使いたくなった場合は `build.sh` の `TILE_ATTRS` に追加してタイルを焼き直す必要があります。
 
-また、低ズームで描かれないフィーチャはタイルから除外しています。上の一覧の `minzoom` と対応させており、建物（Code 3001〜3004）は ZL13未満、等高線（7101〜7104）は ZL12未満、記号・方向・注記はレイヤーごと ZL13未満（基準点等の注記のみ ZL12未満）で落とします。境界が `minzoom` と一致するため線・記号・注記の見た目は変わりませんが、面レイヤは ZL12 以下で建物が描かれなくなります（低ズームでは都市の骨格のみ表示する方針）。**`scripts/build.sh` の閾値と上の一覧は対になっているため、片方を変えたら両方直してください。** 詳細は[ルート README の低ズームで描かれないフィーチャの除外](../README.md#低ズームで描かれないフィーチャの除外)を参照してください。
+また、低ズームで描かれないフィーチャはタイルから除外しています。上の一覧の `minzoom` と対応させており、建物（Code 3001〜3004）は ZL13未満、等高線（7101〜7104）は ZL12未満、記号・方向・注記はレイヤーごと ZL13未満で落とします。境界が `minzoom` と一致するため線・記号・注記の見た目は変わりませんが、面レイヤは ZL12 以下で建物が描かれなくなります（低ズームでは都市の骨格のみ表示する方針）。**`scripts/build.sh` の閾値と上の一覧は対になっているため、片方を変えたら両方直してください。** 詳細は[ルート README の低ズームで描かれないフィーチャの除外](../README.md#低ズームで描かれないフィーチャの除外)を参照してください。

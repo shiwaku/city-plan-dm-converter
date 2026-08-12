@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist --nojekyll"
+    "deploy": "npm run build && gh-pages -d dist --nojekyll",
+    "export:style": "node scripts/export-style.mjs"
   },
   "dependencies": {
     "maplibre-gl": "^5.15.0",

@@ -702,6 +702,11 @@ npm run dev      # http://localhost:5174/
 
 レイヤー構成やスタイル定義は [viewer/README.md](viewer/README.md) を参照してください。
 
+基本図のスタイルは MapLibre スタイルの静的JSONとしても書き出しており、外部ツールから参照できます（`pmtiles://` を解せるツールが必要）。
+
+- https://shiwaku.github.io/dm-converter/style/kihonzu-light.json
+- https://shiwaku.github.io/dm-converter/style/kihonzu-dark.json
+
 > 旧 `shiwaku/city-plan-dm-viewer` リポジトリを履歴ごと本リポジトリに統合しました（旧URL `https://shiwaku.github.io/city-plan-dm-viewer/` は廃止）。
 
 ## データ出典
