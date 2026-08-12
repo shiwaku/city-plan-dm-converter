@@ -1,5 +1,5 @@
-import type { LayerSpecification, SourceSpecification } from 'maplibre-gl'
-import { DM_SPRITE_ID } from './basemap'
+import type { LayerSpecification, SourceSpecification, StyleSpecification } from 'maplibre-gl'
+import { DM_SPRITE_ID, DM_SPRITE_URL, GLYPHS } from './basemap'
 import { codeName } from './dmCodes'
 
 /**
@@ -81,7 +81,7 @@ export const GROUPS: LayerGroup[] = [
   {
     key: 'annotation',
     name: '注記',
-    desc: 'DMの注記要素（E7）。文字列を代表点に配置し、角度属性に従って回転させる。基準点等の注記は1段低いズームから表示する。',
+    desc: 'DMの注記要素（E7）。文字列を代表点に配置し、角度属性に従って回転させる。z13未満では文字が小さすぎて読めないため表示しない。',
     on: true,
     opacity: 1,
   },
@@ -104,6 +104,34 @@ export const inkFor = (theme: 'light' | 'dark'): Ink =>
     ? { line: '#e8eaee', text: '#f2f4f7', halo: '#14161a', fill: '#ffffff' }
     : { line: '#000000', text: '#000000', halo: '#ffffff', fill: '#ffffff' }
 
+/** 背景の色。基本図は白図なので、テーマに合わせて紙の色を替える。 */
+export const paperFor = (theme: 'light' | 'dark'): string =>
+  theme === 'dark' ? '#14161a' : '#ffffff'
+
+/**
+ * テーマに応じて差し替える paint プロパティ。
+ * 実行中の地図に当てる main.ts の applyInk と、静的スタイルを書き出す buildStyle の
+ * 両方から使う。片方だけ直すと見た目が食い違うため、判定はここに1つだけ置く。
+ */
+export function inkPaint(
+  type: LayerSpecification['type'],
+  group: GroupKey,
+  ink: Ink,
+): Record<string, string> {
+  switch (type) {
+    case 'line':
+      return { 'line-color': ink.line }
+    case 'fill':
+      return { 'fill-color': ink.fill }
+    case 'symbol':
+      return group === 'annotation'
+        ? { 'text-color': ink.text, 'text-halo-color': ink.halo }
+        : {}
+    default:
+      return {}
+  }
+}
+
 // ---- レイヤー定義 ----
 
 export interface LayerEntry {
@@ -111,6 +139,31 @@ export interface LayerEntry {
   spec: LayerSpecification
   /** 不透明度スライダーで操作する paint プロパティと、その基準値。 */
   opacity: Record<string, number>
+}
+
+/**
+ * 書き出したスタイルの layer.metadata に載せるキー。
+ * グループ分けと不透明度の基準値は MapLibre スタイル仕様に無い情報だが、
+ * ビューワのパネルが必要とするため metadata で持ち回す。
+ */
+export const GROUP_META = 'dm-converter:group'
+export const OPACITY_META = 'dm-converter:opacity'
+
+/** 書き出したスタイルのレイヤー配列から、ビューワが使う LayerEntry を組み立てる。 */
+export function layerEntriesFromStyle(layers: LayerSpecification[]): LayerEntry[] {
+  const entries: LayerEntry[] = []
+  for (const spec of layers) {
+    const meta = (spec as { metadata?: Record<string, unknown> }).metadata
+    const group = meta?.[GROUP_META] as GroupKey | undefined
+    // background など、グループに属さないレイヤーはパネルの対象外。
+    if (!group) continue
+    entries.push({
+      group,
+      spec,
+      opacity: (meta?.[OPACITY_META] as Record<string, number>) ?? {},
+    })
+  }
+  return entries
 }
 
 /**
@@ -619,6 +672,54 @@ export function buildLayers(): LayerEntry[] {
   })
 
   return e
+}
+
+/**
+ * 都市計画基本図だけで完結する MapLibre スタイルを組み立てる。
+ *
+ * ビューワは背景地図を切り替えたりテーマで色を差し替えたりするため、レイヤー定義を
+ * コードで組み立てて実行時に注入している。そのままでは QGIS や Maputnik のような
+ * 外部ツールに渡せないので、ここで静的なスタイルとして書き出せるようにする。
+ * 書き出しは scripts/export-style.mjs から呼ぶ。
+ *
+ * 背景地図（地理院の最適化ベクトルタイル）は含めない。第三者のスタイルを再配布せず、
+ * 単色の背景の上に基本図だけを載せた白図として自己完結させる。
+ * グループの表示・不透明度はビューワ側のUIで動かすものなので、既定値（全表示・
+ * 不透明度1）で固定する。
+ */
+export function buildStyle(theme: 'light' | 'dark' = 'light'): StyleSpecification {
+  const ink = inkFor(theme)
+  const layers: LayerSpecification[] = [
+    {
+      id: 'background',
+      type: 'background',
+      paint: { 'background-color': paperFor(theme) },
+    },
+    ...buildLayers().map((entry) => {
+      const paint = (entry.spec as { paint?: Record<string, unknown> }).paint
+      return {
+        ...entry.spec,
+        // ビューワはこの JSON からレイヤーを読む。パネルのグループ分けと不透明度
+        // スライダーの基準値はスタイル仕様に無い情報なので metadata に載せる。
+        metadata: { [GROUP_META]: entry.group, [OPACITY_META]: entry.opacity },
+        paint: { ...paint, ...inkPaint(entry.spec.type, entry.group, ink) },
+      } as LayerSpecification
+    }),
+  ]
+  return {
+    version: 8,
+    name: `都市計画基本図（${theme === 'dark' ? 'ダーク' : 'ライト'}）`,
+    metadata: {
+      'dm-converter:generated-by': 'viewer/scripts/export-style.mjs',
+      'dm-converter:source': 'viewer/src/layers.ts の buildStyle()',
+      'dm-converter:note':
+        '生成物。直接編集せず viewer/src/layers.ts を直して書き出し直すこと。',
+    },
+    glyphs: GLYPHS,
+    sprite: [{ id: DM_SPRITE_ID, url: DM_SPRITE_URL }],
+    sources: SOURCES,
+    layers,
+  }
 }
 
 /** クリック時のポップアップ本文。DMの属性を日本語見出しで並べる。 */

@@ -7,9 +7,8 @@ import {
   GROUPS,
   SOURCES,
   SCALE_SWITCH_ZOOM,
-  buildLayers,
   groupOf,
-  inkFor,
+  layerEntriesFromStyle,
   popupHtml,
   POPUP_MAX_ITEMS,
   type PopupItem,
@@ -17,6 +16,11 @@ import {
   type LayerEntry,
   type LayerGroup,
 } from './layers'
+// 基本図のレイヤー定義は書き出した静的スタイルから読む。同じファイルが
+// public/style/ から配信されるため、外部ツールに渡すものと画面に出るものが一致する。
+// 生成は `npm run export:style`（build でも自動実行される）。
+import styleLight from '../public/style/kihonzu-light.json'
+import styleDark from '../public/style/kihonzu-dark.json'
 import { applyThemeAttr, initialTheme, type Theme } from './theme'
 import './style.css'
 
@@ -30,7 +34,17 @@ const DEBUG = new URLSearchParams(location.search).has('debug')
 const protocol = new Protocol()
 maplibregl.addProtocol('pmtiles', protocol.tile)
 
-const LAYERS: LayerEntry[] = buildLayers()
+/**
+ * テーマに対応する基本図のレイヤー定義。
+ * 色はスタイル側に焼き込まれているため、実行時に差し替える必要はない。
+ * 背景地図のダーク化は basemap.ts 側で別に行っている。
+ */
+const layersFor = (t: Theme): LayerEntry[] =>
+  layerEntriesFromStyle(
+    (t === 'dark' ? styleDark : styleLight).layers as unknown as maplibregl.LayerSpecification[],
+  )
+
+let LAYERS: LayerEntry[] = layersFor(theme)
 const entriesOf = (key: GroupKey): LayerEntry[] => LAYERS.filter((l) => l.group === key)
 
 const map = new maplibregl.Map({
@@ -151,30 +165,6 @@ function addDataLayers(): void {
     } as maplibregl.LayerSpecification)
     applyOpacity(entry, g.opacity)
   }
-  applyInk()
-}
-
-/** 背景の明暗に合わせて基本図の線・文字色を入れ替える。 */
-function applyInk(): void {
-  const ink = inkFor(theme)
-  for (const entry of LAYERS) {
-    const id = entry.spec.id
-    if (!map.getLayer(id)) continue
-    switch (entry.spec.type) {
-      case 'line':
-        map.setPaintProperty(id, 'line-color', ink.line)
-        break
-      case 'fill':
-        map.setPaintProperty(id, 'fill-color', ink.fill)
-        break
-      case 'symbol':
-        if (entry.group === 'annotation') {
-          map.setPaintProperty(id, 'text-color', ink.text)
-          map.setPaintProperty(id, 'text-halo-color', ink.halo)
-        }
-        break
-    }
-  }
 }
 
 function applyOpacity(entry: LayerEntry, factor: number): void {
@@ -210,6 +200,8 @@ const renderThemeBtn = (): void => {
 // 完全に再構築する。setStyle 直後は isStyleLoaded() が旧スタイルで true を返して
 // 競合するため、新スタイルが落ち着く idle を待ってからデータ層を貼り直す。
 async function reloadStyle(): Promise<void> {
+  // テーマで基本図のレイヤー定義そのものを読み替える（色が焼き込まれているため）
+  LAYERS = layersFor(theme)
   map.setStyle(await getBasemapStyle(base, theme), { diff: false })
   map.once('idle', () => addDataLayers())
 }

@@ -5,10 +5,11 @@
   "description": "都市計画基本図（DMデータ）の変換結果を表示するWebビューワ",
   "license": "Apache-2.0",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "npm run export:style && vite",
+    "build": "npm run export:style && vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist --nojekyll"
+    "deploy": "npm run build && gh-pages -d dist --nojekyll",
+    "export:style": "node scripts/export-style.mjs"
   },
   "dependencies": {
     "maplibre-gl": "^5.15.0",
