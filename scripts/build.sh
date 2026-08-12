@@ -111,10 +111,9 @@ CONTOUR_MIN_ZOOM=12
 SYMBOL_MIN_ZOOM=13
 DIRECTION_MIN_ZOOM=13
 
-# 注記（E7）は ZL13 から。ただし基準点・標高点等は等高線と同じ ZL12 から出す。
+# 注記（E7）は ZL13 から。それ未満では文字が小さすぎて読めないため出さない。
+# 以前は基準点・標高点等だけ ZL12 から出していたが、そのズームでは読めないためやめた。
 ANNOTATION_MIN_ZOOM=13
-KIJUNTEN_CODES=(3001 3003 6101 7301 7302 7303 7304 7305 7306 7307 7308 7309 7311 7312)
-KIJUNTEN_MIN_ZOOM=12
 
 # 分類コードの並びを JSON の文字列リスト（先頭にカンマ付き）にする。
 json_codes() {
@@ -134,12 +133,6 @@ keep_from_zoom() {
   printf '[">=", "$zoom", %s]' "$1"
 }
 
-# 注記は基準点等だけ1段低いズームから出す。
-annotation_filter() {
-  printf '["any", [">=", "$zoom", %s], ["all", [">=", "$zoom", %s], ["in", "Code"%s]]]' \
-    "$ANNOTATION_MIN_ZOOM" "$KIJUNTEN_MIN_ZOOM" "$(json_codes "${KIJUNTEN_CODES[@]}")"
-}
-
 # tippecanoe の --feature-filter 式（レイヤー名 → 残す条件）を組み立てる。
 tile_filter() {
   local scale="$1" building contour
@@ -150,7 +143,7 @@ tile_filter() {
   printf '"kihonzu_%s_line": ["all", %s, %s], ' "$scale" "$building" "$contour"
   printf '"kihonzu_%s_symbol": %s, ' "$scale" "$(keep_from_zoom "$SYMBOL_MIN_ZOOM")"
   printf '"kihonzu_%s_direction": %s, ' "$scale" "$(keep_from_zoom "$DIRECTION_MIN_ZOOM")"
-  printf '"kihonzu_%s_annotation": %s' "$scale" "$(annotation_filter)"
+  printf '"kihonzu_%s_annotation": %s' "$scale" "$(keep_from_zoom "$ANNOTATION_MIN_ZOOM")"
   printf '}'
 }
 

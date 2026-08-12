@@ -140,15 +140,63 @@ const TEXT_ROTATE = [
  */
 const ICON_ROTATE = ['*', -1, ['coalesce', ['to-number', ['get', 'Angle']], 0]]
 
-/**
- * 方向要素のうち、スプライトにアイコンが存在する分類コード。
- * 5227（せき）・7212（露岩）・2219（道路のトンネル）は未収録のため除外する。
- * 除外しないと MapLibre が画像の読み込み失敗を毎タイル報告する。
- */
-const DIRECTION_CODES = [4219, 5241, 4207, 7213, 4205, 5228, 5226, 3401, 7206]
+// 方向（E6）は以前、スプライトにアイコンが無いコードを列挙して除外していた。
+// アイコン追加（9ee1b99）に除外リストが追随せず、実際には存在する
+// 5227（せき）・7212（露岩）・2219（道路のトンネル）の436件が出ないままだった。
+// 同種の取りこぼしを繰り返さないよう、列挙はやめて全コードを描く。
+// アイコンが無い場合は main.ts の styleimagemissing で透明画像を割り当て、
+// 読み込み失敗の報告を出さずに何も描かない状態にする。
 
-/** 等高線と同じ1段低いズームから出す注記の分類コード（基準点・標高点等）。 */
-const KIJUNTEN_CODES = [3001, 3003, 6101, 7301, 7302, 7303, 7304, 7305, 7306, 7307, 7308, 7309, 7311, 7312]
+/**
+ * 注記を出し始めるズーム。これ未満では文字が小さすぎて読めないため出さない。
+ * scripts/build.sh の ANNOTATION_MIN_ZOOM / KIJUNTEN_MIN_ZOOM と対になっている。
+ */
+const ANNOTATION_MIN_ZOOM = 13
+
+// ---- 記号の大きさの補正 ----
+//
+// dm-sprite のアイコンはすべて 64x64 のキャンバスだが、実際に描画されている領域
+// （bbox）はアイコンごとに 4.4px〜64px とばらつく。icon-size は全コード共通なので、
+// bbox が小さいアイコンだけが小さく見える。
+//
+// dm-sprite 自身の設計基準は bbox 10〜22px（同リポジトリの tools/gen_icons.py）。
+// これを下回るものだけを目標サイズへ引き上げ、基準内のアイコンには手を入れない。
+// 一律に icon-size を上げると、bbox の大きいアイコンが過大になるため。
+//
+// bbox は dm-sprite の tools/inspect_icons.py で実測した値（2026-08-12 時点）。
+// スプライトを更新したら測り直すこと。
+
+/** 補正後の目標 bbox。dm-sprite の設計基準 10〜22px の中央値。 */
+const ICON_TARGET_PX = 18.56
+
+/**
+ * 設計基準（10px）を下回るアイコンのうち、目標サイズへ引き上げるものの実測 bbox。
+ *
+ * 基準を下回っていても補正しないものがある。いずれも図式上そもそも小さく描く記号で、
+ * 基準の中央値まで引き上げると大きすぎた。
+ *   7311 標石を有しない標高点（4.44px）
+ *   7312 図化機測定による標高点（4.44px）
+ *   8199 指示点（5.94px）
+ *   2238 並木（6.19px）
+ * 標高点と指示点は数値注記と組で読む点記号で、記号そのものを目立たせる必要がない。
+ */
+const ICON_BBOX_PX: Record<string, number> = {
+  '3401': 6.19, // 門
+  '5226': 9.31, // 滝
+  '6311': 9.94, // 田
+  '6331': 9.94, // 広葉樹林
+  '6340': 9.94, // 砂れき地（未分類）
+}
+
+/** 分類コードから記号の大きさの補正倍率を引く式。補正しないコードは 1.0。 */
+const iconScale = (): unknown[] => {
+  const match: unknown[] = ['match', ['get', 'Code']]
+  for (const [code, bbox] of Object.entries(ICON_BBOX_PX)) {
+    match.push(code, Math.round((ICON_TARGET_PX / bbox) * 100) / 100)
+  }
+  match.push(1.0)
+  return match
+}
 
 // ---- 分類コード別の線種（公共測量標準図式） ----
 //
@@ -295,9 +343,9 @@ const iconSize = (z1: number, s1: number, z2: number, s2: number): unknown[] => 
   ['linear'],
   ['zoom'],
   z1,
-  ['*', s1, ['case', ['==', ['to-string', ['get', 'Code']], '2238'], 0.4, 1.0]],
+  ['*', s1, iconScale()],
   z2,
-  ['*', s2, ['case', ['==', ['to-string', ['get', 'Code']], '2238'], 0.4, 1.0]],
+  ['*', s2, iconScale()],
 ]
 
 /**
@@ -399,7 +447,6 @@ export function buildLayers(): LayerEntry[] {
       'source-layer': 'kihonzu_10000_direction',
       minzoom: 13,
       maxzoom: SCALE_SWITCH_ZOOM,
-      filter: ['in', ['to-number', ['get', 'Code']], ['literal', DIRECTION_CODES]] as never,
       layout: {
         'icon-image': ['concat', `${DM_SPRITE_ID}:dm-`, ['to-string', ['get', 'Code']]] as never,
         'icon-size': iconSize(13, 0.5, 14, 0.75) as never,
@@ -412,40 +459,39 @@ export function buildLayers(): LayerEntry[] {
     },
   })
 
-  for (const [id, minzoom, kijunten] of [
-    ['kihonzu_10000_annotation', 13, false],
-    ['kihonzu_10000_annotation_kijunten', 12, true],
-  ] as [string, number, boolean][]) {
-    const inKijunten = ['in', ['to-number', ['get', 'Code']], ['literal', KIJUNTEN_CODES]]
-    e.push({
-      group: 'annotation',
-      opacity: { 'text-opacity': 1 },
-      spec: {
-        id,
-        type: 'symbol',
-        source: S,
-        'source-layer': 'kihonzu_10000_annotation',
-        minzoom,
-        maxzoom: SCALE_SWITCH_ZOOM,
-        filter: (kijunten ? inKijunten : ['!', inKijunten]) as never,
-        layout: {
-          'text-field': ['coalesce', ['get', 'Text'], ''] as never,
-          'text-font': TEXT_FONT,
-          'text-size': 10,
-          'text-anchor': 'center',
-          'text-offset': [1.5, -1],
-          'text-rotation-alignment': 'map',
-          'text-rotate': TEXT_ROTATE as never,
-        },
-        paint: {
-          'text-color': '#000',
-          'text-halo-color': '#fff',
-          'text-halo-width': 1.5,
-          'text-opacity': 1,
-        },
+  // 注記は ZL13 未満では文字が小さすぎて読めないため出さない。
+  // 以前は基準点等の注記（KIJUNTEN_CODES）だけ1段低い ZL12 から出していたが、
+  // そのズームでは読めないため分ける意味がなく、1レイヤーに統合した。
+  e.push({
+    group: 'annotation',
+    opacity: { 'text-opacity': 1 },
+    spec: {
+      id: 'kihonzu_10000_annotation',
+      type: 'symbol',
+      source: S,
+      'source-layer': 'kihonzu_10000_annotation',
+      minzoom: ANNOTATION_MIN_ZOOM,
+      maxzoom: SCALE_SWITCH_ZOOM,
+      layout: {
+        'text-field': ['coalesce', ['get', 'Text'], ''] as never,
+        'text-font': TEXT_FONT,
+        'text-size': 10,
+        'text-anchor': 'center',
+        'text-offset': [1.5, -1],
+        // 都市計画基本図の注記は測量成果として決まった位置に置かれるものなので、
+        // 衝突判定で間引かせず全部描く。記号（icon-allow-overlap）と揃える。
+        'text-allow-overlap': true,
+        'text-rotation-alignment': 'map',
+        'text-rotate': TEXT_ROTATE as never,
       },
-    })
-  }
+      paint: {
+        'text-color': '#000',
+        'text-halo-color': '#fff',
+        'text-halo-width': 1.5,
+        'text-opacity': 1,
+      },
+    },
+  })
 
   // ---- 1/2,500（z15〜） ----
   const T = 'kihonzu_2500'
@@ -530,7 +576,6 @@ export function buildLayers(): LayerEntry[] {
       source: T,
       'source-layer': 'kihonzu_2500_direction',
       minzoom: SCALE_SWITCH_ZOOM,
-      filter: ['in', ['to-number', ['get', 'Code']], ['literal', DIRECTION_CODES]] as never,
       layout: {
         'icon-image': ['concat', `${DM_SPRITE_ID}:dm-`, ['to-string', ['get', 'Code']]] as never,
         'icon-size': iconSize(14, 0.5, 18, 1) as never,
@@ -558,6 +603,9 @@ export function buildLayers(): LayerEntry[] {
         'text-size': ['case', ['in', ['to-number', ['get', 'Code']], ['literal', [7312, 7101]]], 9, 14] as never,
         'text-anchor': 'center',
         'text-offset': [1.5, -1],
+        // 都市計画基本図の注記は測量成果として決まった位置に置かれるものなので、
+        // 衝突判定で間引かせず全部描く。記号（icon-allow-overlap）と揃える。
+        'text-allow-overlap': true,
         'text-rotation-alignment': 'map',
         'text-rotate': TEXT_ROTATE as never,
       },
