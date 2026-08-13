@@ -4,7 +4,7 @@ DM（数値地形図データファイル）をGeoJSON形式に変換します�
 
 出力したGeoJSONは、QGIS等での地図表示のほか、tippecanoe・pmtiles によるベクトルタイル化を経て Web地図の背景地図として利用できます。
 
-まず動くものを見るなら、変換済みデータを表示するデモがそのまま開けます（インストール不要）。
+まず動くものを見るなら、変換済みデータを表示するデモがそのまま開けます（インストール不要）。右下の背景切替で「白図」を選ぶと、変換結果である都市計画基本図だけを表示できます。
 
 - **デモ**: https://shiwaku.github.io/dm-converter/
 
@@ -117,6 +117,8 @@ done
 
 本ツールで変換したデータをベクトルタイル化して表示するWebビューワを [`viewer/`](viewer/) に同梱しています。静岡市の都市計画基本図（1/10,000・1/2,500）を、国土地理院の最適化ベクトルタイル（淡色地図風・標準地図風）・全国最新写真・白図（無地）から選べる背景の上に表示します。
 
+**右下の背景切替で「白図」を選ぶと背景地図が消え、都市計画基本図だけが表示されます。** これが本ツールの変換結果そのもので、公共測量標準図式に従った線種・線幅・地図記号・注記の再現を確認できます。他の3つは、基本図を既存の地図や空中写真と重ねて見るための背景です。
+
 ```bash
 cd viewer
 npm install
@@ -155,9 +157,10 @@ dm-converter/
 ├── viewer/               # 変換結果を確認するWebビューワ（Vite + MapLibre）
 ├── scripts/
 │   ├── build.sh          # GeoJSON+GeoParquet+PMTiles の一括生成
-│   └── make-qgis-styles.js  # QGIS レイヤスタイル（qgis/*.qml）の生成
+│   ├── make-qgis-styles.js  # QGIS レイヤスタイル（qgis/*.qml）の生成
+│   └── sync-dm-symbols.js   # 地図記号SVGを dm-sprite の最新に追従させる
 ├── qgis/                 # QGIS レイヤスタイル（記号・方向・注記）
-│   └── symbols/          # 地図記号SVG（dm-sprite / MIT）
+│   └── symbols/          # 地図記号SVG（dm-sprite / MIT）。SOURCE.json に取得元コミット
 ├── LICENSE               # Apache-2.0（対象は変換プログラム。DMデータは対象外）
 └── NOTICE                # 帰属表示・測量法上の表示要件
 ```
