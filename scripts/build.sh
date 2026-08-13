@@ -61,7 +61,7 @@ ogr_path() {
 }
 
 # 縮尺ごとのズーム範囲。最大ZLは「分解能 ≤ 許容誤差（縮尺 × 図上0.1mm）」を
-# 満たす最小のZL。詳細は docs/vector-tiles.md「最大ズームレベルの決め方」を参照。
+# 満たす最小のZL。詳細は docs/build-and-tiles.md「最大ズームレベルの決め方」を参照。
 zoom_range() {
   case "$1" in
     2500)  echo "15 16" ;;

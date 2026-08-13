@@ -4,37 +4,47 @@ DM（数値地形図データファイル）をGeoJSON形式に変換します�
 
 出力したGeoJSONは、QGIS等での地図表示のほか、tippecanoe・pmtiles によるベクトルタイル化を経て Web地図の背景地図として利用できます。
 
+まず動くものを見るなら、変換済みデータを表示するデモがそのまま開けます（インストール不要）。
+
 - **デモ**: https://shiwaku.github.io/dm-converter/
 
-## ドキュメント
+## クイックスタート
 
-| ドキュメント | 内容 |
-|---|---|
-| [都市計画基本図とDMデータ](docs/dm-format.md) | 都市計画基本図とは・縮尺と地図情報レベル・対応レコードタイプ・DMファイルの構造 |
-| [出力仕様](docs/output.md) | 出力ファイルと属性・方向（E6）と注記（E7）の扱い・座標系・処理時間 |
-| [QGIS での表示](docs/qgis.md) | 同梱のレイヤスタイル（`.qml`）・地図記号・角度の読み替え |
-| [ベクトルタイルと一括ビルド](docs/vector-tiles.md) | `scripts/build.sh` の詳細・tippecanoe のオプション・タイル設計 |
-| [利用上の注意](docs/legal.md) | 測量法上の扱い・静岡市データの使用承認・ライセンス |
-| [ビューワ](viewer/README.md) | 同梱のWebビューワのレイヤー構成とスタイル定義 |
+必要なのは **Node.js 18以上**だけです。変換自体に外部ツールは要りません。
 
-## 前提条件
+**1. DMデータを用意する**
 
-- Node.js 18以上
+手元にデータが無ければ、[静岡市オープンデータ](https://data.bodik.jp/dataset/221007_1712212695)の都市計画基本図（1/2,500・1/10,000）が試用に使えます。ダウンロードした `.dm` ファイルを縮尺ごとのフォルダに置きます（`.dmi` が混じっていても読み飛ばされます）。
 
-## セットアップ
+```
+input/
+├── 2500/     # 縮尺1/2,500 の *.dm
+└── 10000/    # 縮尺1/10,000 の *.dm
+```
+
+> DMデータは公共測量成果です。入手先の自治体が定める利用条件を確認してください（[利用上の注意](docs/legal.md)）。
+
+**2. 変換する**
 
 ```bash
+git clone https://github.com/shiwaku/dm-converter.git
+cd dm-converter
 npm install
+node src/index.js            # input/2500/ を変換（座標系の既定は EPSG:6676）
+ls output/                   # 線・面・記号・方向・注記 の5ファイルが出る
 ```
+
+静岡県以外のデータは `--epsg` で入力の平面直角座標系を指定します（例: 愛知県なら `--epsg 6675`）。系の一覧は[出力仕様](docs/output-spec.md#座標系)にあります。
+
+**3. 地図で見る**
+
+出力した GeoJSON は QGIS にそのまま読み込めます。同梱のスタイルを当てると図式どおりに描かれます（[QGIS での表示](docs/qgis.md)）。ベクトルタイル化して自分のデータをビューワで表示する手順は[ベクトルタイルと一括ビルド](docs/build-and-tiles.md)を参照してください。
 
 ## 使い方
 
-DMファイルを `input/<縮尺>/` フォルダに配置してから実行します。
+縮尺・座標系・入力先はオプションで切り替えます。
 
 ```bash
-# 縮尺1/2500、座標系はデフォルト（EPSG:6676）
-node src/index.js
-
 # 縮尺1/10000
 node src/index.js --scale 10000
 
@@ -61,7 +71,7 @@ npm run start:10000  # node src/index.js --scale 10000 と同じ
 | `--input` | `input/<scale>/` | DMファイルが格納されたフォルダ |
 | `--jobs` | CPUコア数 − 1 | 並列変換のワーカー数。`1` で逐次実行 |
 
-`--epsg` に指定できる値は[座標系の一覧](docs/output.md#座標系)を参照してください。既定は JGD2011 第8系（新潟・長野・山梨・静岡）です。
+`--epsg` に指定できる値は[座標系の一覧](docs/output-spec.md#座標系)を参照してください。既定は JGD2011 第8系（新潟・長野・山梨・静岡）です。
 
 ### 出力ファイル
 
@@ -75,7 +85,7 @@ npm run start:10000  # node src/index.js --scale 10000 と同じ
 | `都市計画基本図_<縮尺>_注記.geojson` | 注記要素（E7） |
 | `都市計画基本図_<縮尺>_方向.geojson` | 方向要素（E6） |
 
-属性の一覧は[出力仕様](docs/output.md)を参照してください。
+属性の一覧は[出力仕様](docs/output-spec.md)を参照してください。
 
 ## 一括ビルド（GeoJSON + GeoParquet + PMTiles）
 
@@ -86,7 +96,7 @@ npm run build                    # 1/2,500 と 1/10,000 を一括
 bash scripts/build.sh 2500       # 縮尺を指定
 ```
 
-DM → GeoJSON → GeoParquet（`ogr2ogr`）→ MBTiles（`tippecanoe`）→ PMTiles（`pmtiles convert`）の順に処理します。ogr2ogr / tippecanoe / pmtiles が無ければ該当する段だけスキップされます。段を飛ばす環境変数や tippecanoe のオプションは[ベクトルタイルと一括ビルド](docs/vector-tiles.md)を参照してください。
+DM → GeoJSON → GeoParquet（`ogr2ogr`）→ MBTiles（`tippecanoe`）→ PMTiles（`pmtiles convert`）の順に処理します。ogr2ogr / tippecanoe / pmtiles が無ければ該当する段だけスキップされます。段を飛ばす環境変数や tippecanoe のオプションは[ベクトルタイルと一括ビルド](docs/build-and-tiles.md)を参照してください。
 
 ## QGIS での表示
 
@@ -119,6 +129,17 @@ npm run dev      # http://localhost:5174/
 - https://shiwaku.github.io/dm-converter/style/kihonzu-dark.json
 
 レイヤー構成やスタイル定義は [viewer/README.md](viewer/README.md) を参照してください。
+
+## ドキュメント
+
+| ドキュメント | 内容 |
+|---|---|
+| [都市計画基本図とDMデータ](docs/dm-format.md) | 都市計画基本図とは・縮尺と地図情報レベル・対応レコードタイプ・DMファイルの構造 |
+| [出力仕様](docs/output-spec.md) | 出力ファイルと属性・方向（E6）と注記（E7）の扱い・座標系・処理時間 |
+| [QGIS での表示](docs/qgis.md) | 同梱のレイヤスタイル（`.qml`）・地図記号・角度の読み替え |
+| [ベクトルタイルと一括ビルド](docs/build-and-tiles.md) | `scripts/build.sh` の詳細・tippecanoe のオプション・タイル設計 |
+| [利用上の注意](docs/legal.md) | 測量法上の扱い・静岡市データの使用承認・ライセンス |
+| [ビューワ](viewer/README.md) | 同梱のWebビューワのレイヤー構成とスタイル定義 |
 
 ## ディレクトリ構成
 
