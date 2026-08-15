@@ -132,7 +132,11 @@ async function loadRaw(name: 'pale' | 'std'): Promise<StyleSpecification> {
   return style
 }
 
-/** 地理院 全国最新写真（シームレス）ラスタスタイル。 */
+/**
+ * 静岡市オルソ画像（航空写真）ラスタスタイル。
+ * aerial-photo-tile-pipeline で生成した PMTiles を配信している。pmtiles プロトコルは
+ * main.ts で addProtocol 済みなので、ここでは `pmtiles://` URL を組むだけでよい。
+ */
 function photoStyle(): StyleSpecification {
   return withDmSprite({
     version: 8,
@@ -141,11 +145,13 @@ function photoStyle(): StyleSpecification {
     sources: {
       photo: {
         type: 'raster',
-        tiles: ['https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg'],
+        tiles: ['pmtiles://https://shiworks2.xsrv.jp/shizuoka-city/aerial-photo.pmtiles/{z}/{x}/{y}'],
         tileSize: 256,
-        maxzoom: 18,
+        minzoom: 9,
+        maxzoom: 19,
+        bounds: [138.1612126, 34.8962111, 138.6363958, 35.3293006],
         attribution:
-          '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル（全国最新写真）</a>',
+          '出典: <a href="https://www.geospatial.jp/ckan/dataset/virtual-shizuoka-mw" target="_blank" rel="noopener">静岡県「VIRTUAL SHIZUOKA 静岡県 中・西部 点群データ」</a>（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）を加工して作成',
       },
     },
     layers: [{ id: 'photo', type: 'raster', source: 'photo' }],
