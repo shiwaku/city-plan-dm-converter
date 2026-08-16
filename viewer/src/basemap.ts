@@ -145,7 +145,8 @@ function photoStyle(): StyleSpecification {
     sources: {
       photo: {
         type: 'raster',
-        tiles: ['pmtiles://https://shiworks2.xsrv.jp/shizuoka-city/aerial-photo.pmtiles/{z}/{x}/{y}'],
+        // _test/ は暫定パス。xserver-cleanup 側の正式パス規約が決まり次第、そちらへ差し替える。
+        tiles: ['pmtiles://https://shi-works.com/_test/aerial-photo.pmtiles/{z}/{x}/{y}'],
         tileSize: 256,
         minzoom: 9,
         maxzoom: 19,
