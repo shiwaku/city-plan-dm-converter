@@ -16,12 +16,12 @@
   "sources": {
     "kihonzu": {
       "type": "vector",
-      "url": "pmtiles://https://shiworks2.xsrv.jp/shizuoka-city/kihonzu_10000.pmtiles",
+      "url": "pmtiles://https://shi-works.com/_test/kihonzu_10000.pmtiles",
       "attribution": "<a href=\"https://data.bodik.jp/dataset/221007_1712212695\" target=\"_blank\" rel=\"noopener\">この地図は静岡市長の承認を得て、同市所管の2,500分の1及び10,000分の1静岡市地形図を使用して調製したものである。（承認番号07静都都第2068号）</a>"
     },
     "kihonzu_2500": {
       "type": "vector",
-      "url": "pmtiles://https://shiworks2.xsrv.jp/shizuoka-city/kihonzu_2500.pmtiles",
+      "url": "pmtiles://https://shi-works.com/_test/kihonzu_2500.pmtiles",
       "attribution": "<a href=\"https://data.bodik.jp/dataset/221007_1712212695\" target=\"_blank\" rel=\"noopener\">この地図は静岡市長の承認を得て、同市所管の2,500分の1及び10,000分の1静岡市地形図を使用して調製したものである。（承認番号07静都都第2068号）</a>"
     }
   },
