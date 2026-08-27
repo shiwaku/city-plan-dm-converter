@@ -9,8 +9,7 @@ import { codeName } from './dmCodes'
  *   VITE_PMTILES_BASE=http://localhost:8080 npm run dev
  */
 const PMTILES_BASE =
-  // _test/ は暫定パス。xserver-cleanup 側の正式パス規約が決まり次第、そちらへ差し替える。
-  import.meta.env.VITE_PMTILES_BASE ?? 'https://shi-works.com/_test'
+  import.meta.env.VITE_PMTILES_BASE ?? 'https://shi-works.com/pmtiles/city-shizuoka'
 
 /**
  * 測量成果の使用承認（07静都都第2068号）の条件(3)で明記を求められている文言。
