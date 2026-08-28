@@ -1,9 +1,9 @@
 {
   "repo": "https://github.com/shiwaku/dm-sprite",
   "license": "MIT",
-  "commit": "92c7976530d48b41153e155ee78305a19e51d975",
-  "committed_at": "2026-08-12T23:57:08Z",
-  "icons": 158,
-  "synced_at": "2026-08-13T01:38:13.433Z",
+  "commit": "ff2ccb1acc1cd35843b13d5171504fe47746cdd7",
+  "committed_at": "2026-08-28T00:52:52Z",
+  "icons": 176,
+  "synced_at": "2026-08-28T06:27:32.768Z",
   "note": "scripts/sync-dm-symbols.js が生成。手で編集しないこと。"
 }
